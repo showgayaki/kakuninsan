@@ -30,7 +30,7 @@ def insert_info(clm_dict, computer_name, global_ip, created_at, updated_at):
 def create_body(computer_name, last, current, insert_result):
     if last == current:
         subject = 'IP Address is NOT updated'
-    elif last or current in 'Error':
+    elif 'Error' in last or 'Error' in current:
         subject = 'IP Address FAILED to get'
     else:
         subject = 'IP Address is UPDATED'
