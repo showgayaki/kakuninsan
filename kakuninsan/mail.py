@@ -33,7 +33,7 @@ class Mail:
 class Html:
     def __init__(self):
         self.env = Environment(loader=FileSystemLoader('.'))
-        self.template = self.env.get_template('templates/base.html')
+        self.template = self.env.get_template('kakuninsan/templates/base.html')
 
     @staticmethod
     def image_file_to_base64(file_path):

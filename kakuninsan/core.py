@@ -7,6 +7,7 @@ import database
 from mail import Mail, Html
 import logger
 import requests
+from pathlib import Path
 
 
 def insert_info(now, computer_name, st_result):
@@ -27,7 +28,10 @@ def insert_info(now, computer_name, st_result):
 def download_image(now, current_dir, url):
     now = now.strftime('%Y-%m-%d_%H-%M-%S')
     res = requests.get(url)
-    image_file_path = os.path.join(current_dir, 'templates/img/{}.png'.format(now))
+    image_dir = os.path.join(current_dir, 'templates/img')
+    if not os.path.exists(image_dir):
+        os.makedirs(image_dir)
+    image_file_path = os.path.join(image_dir, '{}.png'.format(now))
     image = res.content
     with open(image_file_path, 'wb') as f:
         f.write(image)
