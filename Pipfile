@@ -16,4 +16,4 @@ jinja2 = "*"
 python_version = "3.8"
 
 [scripts]
-core = "python3 kakuninsan/core.py"
+kakuninsan = "python3 kakuninsan/core.py"
