@@ -1,5 +1,6 @@
 from logging import Formatter, handlers, getLogger
 import os
+from pathlib import Path
 
 
 class Logger:
@@ -11,7 +12,10 @@ class Logger:
 
         # file
         dir_name = os.path.basename(file_path)
-        filename = '{}/log/{}.log'.format(file_path, dir_name)
+        log_dir = os.path.join(Path(file_path).resolve().parents[0], 'log')
+        if not os.path.exists(log_dir):
+            os.makedirs(log_dir)
+        filename = '{}/{}.log'.format(log_dir, dir_name)
 
         handler = handlers.RotatingFileHandler(filename=filename, maxBytes=1048576, backupCount=3)
         handler.setLevel(level)

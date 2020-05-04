@@ -9,9 +9,11 @@ verify_ssl = true
 requests = "*"
 mysql-connector-python = "*"
 python-dotenv = "*"
+speedtest-cli = "*"
+jinja2 = "*"
 
 [requires]
-python_version = "3.7"
+python_version = "3.8"
 
 [scripts]
 core = "python3 kakuninsan/core.py"

@@ -1,92 +1,93 @@
-import consts
-import currentip
-import database
-import mail
-import logger
 import socket
 import datetime
+import os
+from config import Config
+from speed_test import SpeedTest
+import database
+from mail import Mail, Html
+import logger
+import requests
 
 
-def current_ip(url_dict):
-    ip = currentip.CurrentGlobalIp(url_dict)
-    return ip.fetch_current_ip()
-
-
-def last_ip(connect_db, clm_created_at):
-    return connect_db.fetch_last_ip(clm_created_at)
-
-
-def insert_info(clm_dict, computer_name, global_ip, created_at, updated_at):
+def insert_info(now, computer_name, st_result):
+    now = now.strftime('%Y-%m-%d_%H:%M:%S')
     insert_dict = {
-        'computer_name': computer_name,
-        'global_ip': global_ip,
-        'created_at': created_at,
-        'updated_at': updated_at
+        'computer_name': computer_name
+        , 'global_ip_address': st_result['global_ip_address']
+        , 'download': st_result['download']
+        , 'upload': st_result['upload']
+        , 'image_url': st_result['image_url']
+        , 'created_at': now
+        , 'updated_at': now
     }
-    insert_dict.update(clm_dict)
+
     return insert_dict
 
 
-def create_body(computer_name, last, current, insert_result):
-    if last == current:
-        subject = 'IP Address is NOT updated'
-    elif 'Error' in last or 'Error' in current:
-        subject = 'IP Address FAILED to get'
-    else:
-        subject = 'IP Address is UPDATED'
-
-    body = f'Computer Name      : {computer_name}\n'\
-        f'Last IP Address    : {last}\n'\
-        f'Current IP Address : {current}\n\n'\
-        f'DB Insert {insert_result}'
-
-    body_dict = {
-        'subject': subject,
-        'body': body
-    }
-    return body_dict
+def download_image(now, current_dir, url):
+    now = now.strftime('%Y-%m-%d_%H-%M-%S')
+    res = requests.get(url)
+    image_file_path = os.path.join(current_dir, 'templates/img/{}.png'.format(now))
+    image = res.content
+    with open(image_file_path, 'wb') as f:
+        f.write(image)
+    return image_file_path, image
 
 
-def create_sql_dict(insert_dict, sql_dict,  table_name):
-    del sql_dict['host'], sql_dict['user'], sql_dict['password']
-    sql_dict['table_name'] = table_name
-    sql_dict.update(insert_dict)
+def mail_subject(records):
+    is_updated = False
+    for i, record in enumerate(records):
+        if i != len(records) - 1:
+            if records[i][1] != records[i + 1][1]:
+                is_updated = True
+                record.append('updated')
+            else:
+                record.append('')
+        else:
+            record.append('')
+    subject = 'IP Address is UPDATED' if is_updated else 'IP Address is NOT updated'
 
-    return sql_dict
-
-
-def mail_result(smtp_dict, body_dict):
-    mailer = mail.Mail(smtp_dict)
-    msg = mailer.create_message(body_dict)
-    return mailer.send_mail(msg)
+    return records, subject
 
 
 def main():
-    log = logger.Logger(consts.FILE_PATH, 10)
-    now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    now = datetime.datetime.now()
+    current_dir = os.path.abspath(os.path.dirname(__file__))
+    log = logger.Logger(current_dir, 10)
+    config = Config(current_dir)
+    cfg = config.config()
+
     # computer_name取得
     computer_name = socket.gethostname()
+    log.logging('Started on {}'.format(computer_name))
 
-    # サイトから現在のIP取得
-    current = current_ip(consts.URL_INFO)
-    log.logging('Current IP Address:{}'.format(current))
+    # スピードテスト
+    options = ['speedtest', '--json', '--share']
+    st = SpeedTest(options)
+    st_result = st.speed_test_result()
+    log.logging('Current IP Address: {}'.format(st_result['global_ip_address']))
 
-    # データベースから前回のIP取得
-    connect_db = database.TableIp(consts.DB_INFO, consts.TABLE_NAME)
-    last = last_ip(connect_db, consts.COLUMNS['clm_created_at'])
-    log.logging('Last IP Address:{}'.format(last))
-
-    # insert用dict作成
-    insert_dict = insert_info(consts.COLUMNS, computer_name, current, now, now)
-    sql_dict = create_sql_dict(insert_dict, consts.DB_INFO, consts.TABLE_NAME)
-
-    # insertログ
-    insert_result = connect_db.insert_record(sql_dict)
+    # Insert
+    db = database.TableIp(cfg['db_info'], cfg['table_detail']['table_name'])
+    insert_dict = insert_info(now, computer_name, st_result)
+    insert_result = db.insert_record(cfg['db_info'], cfg['table_detail'], insert_dict)
     log.logging('DB insert {}'.format(insert_result))
 
+    # データベースからレコード取得
+    last_records = db.fetch_last_ip(cfg['table_detail']['clm_created_at'])
+
+    # メール作成
+    records, subject = mail_subject(last_records)
+    html = Html()
+    # ToDo matplotlibで回線速度をグラフ化
+    image_file_path, image = download_image(now, current_dir, st_result['image_url'])
+    contents = html.build_html(records, image_file_path)
+    body_dict = {'subject': subject, 'body': contents}
+
     # メール送信
-    body_dict = create_body(computer_name, last, current, insert_result)
-    result = mail_result(consts.MAIL_INFO, body_dict)
+    mailer = Mail(cfg['mail_info'])
+    msg = mailer.create_message(body_dict)
+    result = mailer.send_mail(msg)
     log.logging('Send Mail {}'.format(result))
 
 

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+    <style>
+        h2{
+            width: 50%;
+            padding-left: 5px;
+            padding-bottom: 2px;
+            border-left: 5px solid #f00;
+            border-bottom: 1px solid #f00;
+        }
+        table{
+            border-collapse: collapse;
+        }
+        th{
+            background-color: #DDDDDD;
+        }
+        th, td{
+            font-size: 12px;
+            border: 1px solid #000;
+        }
+        .download, .upload{
+            text-align: right;
+        }
+        .updated{
+            background-color: #FF9872;
+        }
+    </style>
+</head>
+<body>
+    <h2>Fig SpeedTest</h2>
+    <img src="data:image/png;base64,{{ image }}" alt="Speed Graph">
+    <h2>Records</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Datetime</th><th>Computer Name</th><th>IP address</th><th>Download(Mbps)</th><th>Upload(Mbps)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in records %}
+            {% set download = (record[2] / 1000 / 1000) | round%}
+            {% set upload = (record[3] / 1000 / 1000) | round%}
+            <tr class="{{ record[-1] }}">
+                <td>{{ record[5] }}</td><td>{{ record[0] }}</td><td>{{ record[1] }}</td><td class="download">{{ download }}</td><td class="upload">{{ upload }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
