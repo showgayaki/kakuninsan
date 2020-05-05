@@ -1,3 +1,4 @@
+import os
 import smtplib
 from email.mime.text import MIMEText
 from email.utils import formatdate
@@ -36,8 +37,15 @@ class Html:
         self.template = self.env.get_template('kakuninsan/templates/base.html')
 
     def build_html(self, records, image_file_path):
-        with open(image_file_path, 'rb') as f:
-            data = base64.b64encode(f.read())
-        image = data.decode('utf-8')
+        if image_file_path:
+            with open(image_file_path, 'rb') as f:
+                data = base64.b64encode(f.read())
+            image = data.decode('utf-8')
+            try:
+                os.remove(image_file_path)
+            except OSError:
+                image = ''
+        else:
+            image = ''
         contents = self.template.render(records=records, image=image)
         return contents

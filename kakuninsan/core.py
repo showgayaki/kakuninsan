@@ -1,8 +1,6 @@
 import os
 import socket
 import datetime
-import requests
-from pathlib import Path
 import config
 from speed_test import SpeedTest
 from database import TableIp
@@ -22,21 +20,7 @@ def insert_info(now, computer_name, st_result):
         , 'created_at': now
         , 'updated_at': now
     }
-
     return insert_dict
-
-
-def download_image(now, current_dir, url):
-    now = now.strftime('%Y-%m-%d_%H-%M-%S')
-    res = requests.get(url)
-    image_dir = os.path.join(Path(current_dir).resolve().parents[0], 'img')
-    if not os.path.exists(image_dir):
-        os.makedirs(image_dir)
-    image_file_path = os.path.join(image_dir, '{}.png'.format(now))
-    image = res.content
-    with open(image_file_path, 'wb') as f:
-        f.write(image)
-    return image_file_path, image
 
 
 def mail_subject(records):
@@ -51,7 +35,6 @@ def mail_subject(records):
         else:
             record.append('')
     subject = 'IP Address is UPDATED' if is_updated else 'IP Address is NOT updated'
-
     return records, subject
 
 
@@ -70,6 +53,8 @@ def main():
     st = SpeedTest(options)
     st_result = st.speed_test_result()
     log.logging('Current IP Address: {}'.format(st_result['global_ip_address']))
+    log.logging('Download Speed: {} bps'.format(int(st_result['download'])))
+    log.logging('Upload Speed: {} bps'.format(int(st_result['upload'])))
 
     # Insert
     db = TableIp(cfg['db_info'], cfg['table_detail']['table_name'])
@@ -82,12 +67,11 @@ def main():
         # データベースからレコード取得
         past_records = db.fetch_last_ip(cfg['table_detail']['clm_created_at'])
         graph = Graph(past_records)
-        graph.draw_graph(now, current_dir)
+        image_file_path = graph.draw_graph(now, current_dir)
 
         # メール作成
         records, subject = mail_subject(past_records)
         html = Html()
-        image_file_path, image = download_image(now, current_dir, st_result['image_url'])
         contents = html.build_html(records, image_file_path)
         body_dict = {'subject': subject, 'body': contents}
 
