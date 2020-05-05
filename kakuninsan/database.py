@@ -3,14 +3,14 @@ from mysql import connector
 
 class TableIp:
     def __init__(self, db_dict, table_name):
-        self.RECORD_LIMIT = 24
+        self.RECORD_LIMIT_HOUR = 24
         self.db_dict = db_dict.copy()
         self.table_name = table_name
 
     def fetch_last_ip(self, clm_created_at):
-        # 直近1日分(24件)取得
-        sql = 'SELECT * FROM {} ORDER BY {} DESC LIMIT {}'.format(
-            self.table_name, clm_created_at, self.RECORD_LIMIT
+        # 直近24時間分取得
+        sql = 'SELECT * FROM {} WHERE DATE_ADD({}, INTERVAL {} HOUR) > NOW()'.format(
+            self.table_name, clm_created_at, self.RECORD_LIMIT_HOUR
         )
 
         conn = connector.connect(**self.db_dict)
@@ -19,7 +19,7 @@ class TableIp:
         try:
             cur.execute(sql)
             records = cur.fetchall()
-            last_records = [list(record) for record in records]
+            last_records = [list(record) for record in reversed(records)]
         except connector.Error as e:
             return 'Error: {}'.format(e)
         finally:

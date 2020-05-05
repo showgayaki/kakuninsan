@@ -13,6 +13,7 @@ class Graph:
         upload: 3
         created_at: 5
     """
+
     def __init__(self, data):
         self.data = data
 
@@ -26,14 +27,14 @@ class Graph:
 
         fig = plt.figure(figsize=(9, 6))
         ax = fig.add_subplot(111)
+
+        # プロットデータ配列作成
         x = []
         y_download = []
         y_upload = []
-        # プロットデータ配列作成
+        dt_max = ''
         for i, d in enumerate(reversed(self.data)):
-            if i == 0:
-                dt_min = d[5].replace(minute=0, second=0)
-            else:
+            if i == len(self.data) - 1:
                 dt_max = d[5].replace(minute=0, second=0) + datetime.timedelta(hours=1)
             x.append(d[5])
             download = bytes_to_megabytes(d[2])
@@ -45,29 +46,24 @@ class Graph:
         ax.plot(x, y_upload, 'o-', ms=2, label='Upload')
 
         # x軸目盛り用配列作成
+        interval_hour = 24
         x_axis = []
-        i = 0
-        while True:
-            dt = dt_min + datetime.timedelta(hours=i)
+        for i in reversed(range(0, interval_hour)):
+            dt = dt_max + datetime.timedelta(hours=-i)
             x_axis.append(dt)
-            i += 1
-            # 無限ループになったらイヤなので、いちおう48上限
-            if dt == dt_max or i == 48:
-                break
 
         # x軸の目盛り
         xticks = mdates.date2num(x_axis)
+        ax.set_xlim(mdates.date2num([x_axis[0], dt_max]))
         ax.xaxis.set_major_locator(mdates.ticker.FixedLocator(xticks))
-        ax.xaxis.set_minor_locator(mdates.HourLocator(byhour=range(5, 24, 1), tz=None))
-        ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
+        ax.xaxis.set_major_formatter(mdates.DateFormatter('%-H'))
 
         # グラフ装飾
-        dt_min_view = '{0:%-m/%-d}'.format(dt_min)
+        dt_min_view = '{0:%-m/%-d}'.format(x_axis[0])
         dt_max_view = '{0:%-m/%-d}'.format(dt_max)
         plt.title('Internet Speed ({} - {})'.format(dt_min_view, dt_max_view))
         plt.legend(loc='upper left', fontsize=9)
-        plt.xlabel('Datetime')
-        plt.xticks(rotation=40)
+        plt.xlabel('Hour')
         plt.ylabel('Speed(Mbps)')
         plt.grid(True)
 
