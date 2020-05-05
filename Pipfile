@@ -11,6 +11,7 @@ mysql-connector-python = "*"
 python-dotenv = "*"
 speedtest-cli = "*"
 jinja2 = "*"
+matplotlib = "*"
 
 [requires]
 python_version = "3.8"

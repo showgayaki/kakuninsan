@@ -42,8 +42,8 @@
         </thead>
         <tbody>
             {% for record in records %}
-            {% set download = (record[2] / 1000 / 1000) | round%}
-            {% set upload = (record[3] / 1000 / 1000) | round%}
+            {% set download = (record[2] / 1000 / 1000) | int %}
+            {% set upload = (record[3] / 1000 / 1000) | int %}
             <tr class="{{ record[-1] }}">
                 <td>{{ record[5] }}</td><td>{{ record[0] }}</td><td>{{ record[1] }}</td><td class="download">{{ download }}</td><td class="upload">{{ upload }}</td>
             </tr>

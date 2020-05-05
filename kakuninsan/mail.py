@@ -35,13 +35,9 @@ class Html:
         self.env = Environment(loader=FileSystemLoader('.'))
         self.template = self.env.get_template('kakuninsan/templates/base.html')
 
-    @staticmethod
-    def image_file_to_base64(file_path):
-        with open(file_path, 'rb') as f:
-            data = base64.b64encode(f.read())
-        return data.decode('utf-8')
-
     def build_html(self, records, image_file_path):
-        image = self.image_file_to_base64(image_file_path)
-        contents = self.template.render(test='これはテストです', records=records, image=image)
+        with open(image_file_path, 'rb') as f:
+            data = base64.b64encode(f.read())
+        image = data.decode('utf-8')
+        contents = self.template.render(records=records, image=image)
         return contents
