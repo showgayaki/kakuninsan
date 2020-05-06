@@ -23,11 +23,17 @@ def insert_info(now, computer_name, st_result):
     return insert_dict
 
 
-def mail_subject(records):
+def build_contents(db, cfg, now):
+    # データベースからレコード取得
+    past_records = db.fetch_last_ip(cfg['table_detail']['clm_created_at'])
+    graph = Graph(past_records)
+    image_file_path = graph.draw_graph(now)
+
+    # IPの更新有無によってメールsubject変更
     is_updated = False
-    for i, record in enumerate(records):
-        if i != len(records) - 1:
-            if records[i][1] != records[i + 1][1]:
+    for i, record in enumerate(past_records):
+        if i != len(past_records) - 1:
+            if past_records[i][1] != past_records[i + 1][1]:
                 is_updated = True
                 record.append('updated')
             else:
@@ -35,7 +41,19 @@ def mail_subject(records):
         else:
             record.append('')
     subject = 'IP Address is UPDATED' if is_updated else 'IP Address is NOT updated'
-    return records, subject
+
+    # コンテンツ作成
+    html = Html()
+    contents = html.build_html(past_records, image_file_path)
+    # htmlフォルダなかったら作って、index.htmlに書き出し
+    index_dir = os.path.join(cfg['web_server']['document_root'])
+    if not os.path.isdir(index_dir):
+        os.makedirs(index_dir)
+    index_path = os.path.join(index_dir, 'index.html')
+
+    with open(index_path, 'w', encoding='utf-8') as f:
+        f.write(contents)
+    return subject, contents
 
 
 def main():
@@ -62,26 +80,18 @@ def main():
     insert_result = db.insert_record(cfg['db_info'], cfg['table_detail'], insert_dict)
     log.logging('DB insert {}'.format(insert_result))
 
-    # 指定時間になったらメール送信
+    # 指定時間になったらメール送信。指定時間以外は、webサーバー動いている環境ならindex.htmlに書き出し
     if now.strftime('%H:%M') == cfg['mail_send_time']:
-        # データベースからレコード取得
-        past_records = db.fetch_last_ip(cfg['table_detail']['clm_created_at'])
-        graph = Graph(past_records)
-        image_file_path = graph.draw_graph(now, current_dir)
-
-        # メール作成
-        records, subject = mail_subject(past_records)
-        html = Html()
-        contents = html.build_html(records, image_file_path)
-        body_dict = {'subject': subject, 'body': contents}
-
+        subject, contents = build_contents(db, cfg, now)
         # メール送信
+        body_dict = {'subject': subject, 'body': contents}
         mailer = Mail(cfg['mail_info'])
         msg = mailer.create_message(body_dict)
         result = mailer.send_mail(msg)
         log.logging('Send Mail {}'.format(result))
-    else:
-        log.logging('It is not time to send an email')
+    elif cfg['web_server']['is_running'] == 'True':
+        build_contents(db, cfg, now)
+        log.logging('It is not time to send an email.')
 
     log.logging('Stopped.')
 

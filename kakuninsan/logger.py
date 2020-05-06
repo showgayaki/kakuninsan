@@ -13,7 +13,7 @@ class Logger:
         # file
         dir_name = os.path.basename(file_path)
         log_dir = os.path.join(Path(file_path).resolve().parents[0], 'log')
-        if not os.path.exists(log_dir):
+        if not os.path.isdir(log_dir):
             os.makedirs(log_dir)
         filename = '{}/{}.log'.format(log_dir, dir_name)
 

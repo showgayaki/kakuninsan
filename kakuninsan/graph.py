@@ -13,15 +13,14 @@ class Graph:
         upload: 3
         created_at: 5
     """
-
     def __init__(self, data):
         self.data = data
 
-    def draw_graph(self, now, current_dir):
+    def draw_graph(self, now):
         # グラフ画像ファイル
         now = now.strftime('%Y-%m-%d_%H-%M-%S')
-        image_dir = os.path.join(Path(current_dir).resolve().parents[0], 'img')
-        if not os.path.exists(image_dir):
+        image_dir = os.path.join(Path(os.path.dirname(__file__)).parent, 'img')
+        if not os.path.isdir(image_dir):
             os.makedirs(image_dir)
         image_file_path = os.path.join(image_dir, '{}.png'.format(now))
 
@@ -48,7 +47,7 @@ class Graph:
         # x軸目盛り用配列作成
         interval_hour = 24
         x_axis = []
-        for i in reversed(range(0, interval_hour)):
+        for i in reversed(range(0, interval_hour + 2)):
             dt = dt_max + datetime.timedelta(hours=-i)
             x_axis.append(dt)
 
@@ -65,6 +64,7 @@ class Graph:
         plt.legend(loc='upper left', fontsize=9)
         plt.xlabel('Hour')
         plt.ylabel('Speed(Mbps)')
+        plt.ylim(0,)
         plt.grid(True)
 
         # グラフ画像保存
