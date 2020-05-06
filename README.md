@@ -6,6 +6,14 @@
  - 上記をHTMLメールで通知（24時間に1回）
  - HTMLに書き出すのでnginxとかでアレすれば、ブラウザからデータ閲覧可
 
+## kakuninsanインストール
+`$ git clone [ここのURL].git`  
+`$ cd kakuninsan`
+
+（仮想環境をプロジェクトディレクトリ配下に作る場合  
+`$ export PIPENV_VENV_IN_PROJECT=true`）  
+`$ pipenv install`
+
 ## 設定
 .env.sampleを.envにリネームして、各項目に入力。  
 ```
@@ -33,14 +41,6 @@ MAIL_SEND_TIME=[メール送信する時間 ex)06:00]
 IS_RUNNING_WEB_SERVER=[Webサーバーが動いているかどうか:True or False]
 DOCUMENT_ROOT=[HTMLの書き出し場所]
 ```
-
-## kakuninsanインストール
-`$ git clone [ここのURL].git`  
-`$ cd kakuninsan`
-
-（仮想環境をプロジェクトディレクトリ配下に作る場合  
-`$ export PIPENV_VENV_IN_PROJECT=true`）  
-`$ pipenv install`
 
 ## cron設定
 こんな感じで設定。下記は毎時30分に実行の例。  
