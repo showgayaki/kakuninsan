@@ -31,35 +31,27 @@ class Graph:
         x = []
         y_download = []
         y_upload = []
-        dt_max = ''
-        for i, d in enumerate(reversed(self.data)):
-            if i == len(self.data) - 1:
-                dt_max = d[5].replace(minute=0, second=0) + datetime.timedelta(hours=1)
+        x_axis = []
+        for d in reversed(self.data):
             x.append(d[5])
-            download = bytes_to_megabytes(d[2])
-            upload = bytes_to_megabytes(d[3])
-            y_download.append(download)
-            y_upload.append(upload)
+            y_download.append(bytes_to_megabytes(d[2]))
+            y_upload.append(bytes_to_megabytes(d[3]))
+            x_axis.append(d[5].replace(minute=0, second=0))
+        else:
+            x_axis.append(d[5].replace(minute=0, second=0) + datetime.timedelta(hours=1))
 
         ax.plot(x, y_download, 'o-', ms=2, label='Download')
         ax.plot(x, y_upload, 'o-', ms=2, label='Upload')
 
-        # x軸目盛り用配列作成
-        interval_hour = 24
-        x_axis = []
-        for i in reversed(range(0, interval_hour + 2)):
-            dt = dt_max + datetime.timedelta(hours=-i)
-            x_axis.append(dt)
-
         # x軸の目盛り
         xticks = mdates.date2num(x_axis)
-        ax.set_xlim(mdates.date2num([x_axis[0], dt_max]))
+        ax.set_xlim(mdates.date2num([x_axis[0], x_axis[-1]]))
         ax.xaxis.set_major_locator(mdates.ticker.FixedLocator(xticks))
         ax.xaxis.set_major_formatter(mdates.DateFormatter('%-H'))
 
         # グラフ装飾
         dt_min_view = '{0:%-m/%-d}'.format(x_axis[0])
-        dt_max_view = '{0:%-m/%-d}'.format(dt_max)
+        dt_max_view = '{0:%-m/%-d}'.format(x_axis[-1])
         plt.title('Internet Speed ({} - {})'.format(dt_min_view, dt_max_view))
         plt.legend(loc='upper left', fontsize=9)
         plt.xlabel('Hour')
