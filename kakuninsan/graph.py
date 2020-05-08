@@ -16,14 +16,7 @@ class Graph:
     def __init__(self, data):
         self.data = data
 
-    def draw_graph(self, now):
-        # グラフ画像ファイル
-        now = now.strftime('%Y-%m-%d_%H-%M-%S')
-        image_dir = os.path.join(Path(os.path.dirname(__file__)).parent, 'img')
-        if not os.path.isdir(image_dir):
-            os.makedirs(image_dir)
-        image_file_path = os.path.join(image_dir, '{}.png'.format(now))
-
+    def draw_graph(self):
         fig = plt.figure(figsize=(9, 6))
         ax = fig.add_subplot(111)
 
@@ -31,19 +24,27 @@ class Graph:
         x = []
         y_download = []
         y_upload = []
-        x_axis = []
         for d in reversed(self.data):
             x.append(d[5])
             y_download.append(bytes_to_megabytes(d[2]))
             y_upload.append(bytes_to_megabytes(d[3]))
-            x_axis.append(d[5].replace(minute=0, second=0))
-        else:
-            x_axis.append(d[5].replace(minute=0, second=0) + datetime.timedelta(hours=1))
 
         ax.plot(x, y_download, 'o-', ms=2, label='Download')
         ax.plot(x, y_upload, 'o-', ms=2, label='Upload')
 
-        # x軸の目盛り
+        # x軸目盛線：レコードすべてを含むように
+        dt_max = self.data[0][5].replace(minute=0, second=0, microsecond=0)
+        dt_min = self.data[-1][5].replace(minute=0, second=0, microsecond=0)
+        x_axis = []
+        i = 0
+        while True:
+            dt = dt_min + datetime.timedelta(hours=i)
+            x_axis.append(dt)
+            i += 1
+            if dt == dt_max:
+                x_axis.append(dt_min + datetime.timedelta(hours=i))
+                break
+
         xticks = mdates.date2num(x_axis)
         ax.set_xlim(mdates.date2num([x_axis[0], x_axis[-1]]))
         ax.xaxis.set_major_locator(mdates.ticker.FixedLocator(xticks))
@@ -60,6 +61,11 @@ class Graph:
         plt.grid(True)
 
         # グラフ画像保存
+        now = datetime.datetime.now()
+        image_dir = os.path.join(Path(os.path.dirname(__file__)).parent, 'img')
+        if not os.path.isdir(image_dir):
+            os.makedirs(image_dir)
+        image_file_path = os.path.join(image_dir, '{0:%Y-%m-%d_%H-%M-%S}.png'.format(now))
         fig.savefig(image_file_path, bbox_inches="tight")
 
         return image_file_path if os.path.exists(image_file_path) else ''

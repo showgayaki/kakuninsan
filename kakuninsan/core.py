@@ -23,17 +23,20 @@ def insert_info(now, computer_name, st_result):
     return insert_dict
 
 
-def build_contents(db, cfg, now):
+def build_contents(db, cfg, log):
     # データベースからレコード取得
-    past_records = db.fetch_last_ip(cfg['table_detail']['clm_created_at'])
-    graph = Graph(past_records)
-    image_file_path = graph.draw_graph(now)
+    records = db.fetch_last_ip(cfg['table_detail']['clm_created_at'])
+    log.logging('Last IP Address: {}'.format(records[0][1]))
+
+    # グラフ画像
+    graph = Graph(records)
+    image_file_path = graph.draw_graph()
 
     # IPの更新有無によってメールsubject変更
     is_updated = False
-    for i, record in enumerate(past_records):
-        if i != len(past_records) - 1:
-            if past_records[i][1] != past_records[i + 1][1]:
+    for i, record in enumerate(records):
+        if i != len(records) - 1:
+            if records[i][1] != records[i + 1][1]:
                 is_updated = True
                 record.append('updated')
             else:
@@ -44,7 +47,7 @@ def build_contents(db, cfg, now):
 
     # コンテンツ作成
     html = Html()
-    contents = html.build_html(past_records, image_file_path)
+    contents = html.build_html(records, image_file_path)
     # htmlフォルダなかったら作って、index.htmlに書き出し
     index_dir = os.path.join(cfg['web_server']['document_root'])
     if not os.path.isdir(index_dir):
@@ -53,7 +56,7 @@ def build_contents(db, cfg, now):
 
     with open(index_path, 'w', encoding='utf-8') as f:
         f.write(contents)
-    return subject, contents
+    return {'subject': subject, 'body': contents}
 
 
 def main():
@@ -82,15 +85,14 @@ def main():
 
     # 指定時間になったらメール送信。指定時間以外は、webサーバー動いている環境ならindex.htmlに書き出し
     if now.strftime('%H:%M') == cfg['mail_send_time']:
-        subject, contents = build_contents(db, cfg, now)
+        body_dict = build_contents(db, cfg, log)
         # メール送信
-        body_dict = {'subject': subject, 'body': contents}
         mailer = Mail(cfg['mail_info'])
         msg = mailer.create_message(body_dict)
         result = mailer.send_mail(msg)
         log.logging('Send Mail {}'.format(result))
     elif cfg['web_server']['is_running'] == 'True':
-        build_contents(db, cfg, now)
+        build_contents(db, cfg, log)
         log.logging('It is not time to send an email.')
 
     log.logging('Stopped.')
