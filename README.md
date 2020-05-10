@@ -5,6 +5,7 @@
  - 直近24時間分の回線速度をグラフ化
  - 上記をHTMLメールで通知（24時間に1回）
  - HTMLに書き出すのでnginxとかでアレすれば、ブラウザからデータ閲覧可
+ - [livereloadx](https://github.com/nitoyon/livereloadx)を使用して、更新があった場合にブラウザ自動リロード
 
 ## kakuninsanインストール
 `$ git clone [ここのURL].git`  
@@ -50,8 +51,12 @@ DOCUMENT_ROOT=[HTMLの書き出し場所]
 `$ crontab -u ubuntu cron.txt`  
 とやったほうが安全ぽい（ユーザー：ubuntu、別ファイル：cron.txtの場合）。
 
-## nginx設定
-`$ sudo vi /etc/nginx/sites-available/default`
+設定後、再起動が必要かも。  
+`$ sudo /etc/init.d/cron restart`  
+
+## Webサーバーまわり
+### nginx設定
+`$ sudo nano /etc/nginx/sites-available/default`
 以下location〜箇所を追記。
 ```
 server {
@@ -63,6 +68,48 @@ server {
 ```
 追記したら  
 `$ sudo nginx -s reload`
+
+### Node.jsを難なくインストール
+`$ sudo apt install -y nodejs npm`  
+`$ sudo npm install n -g`  
+`$ sudo n stable`  
+`$ sudo apt purge -y nodejs npm`  
+`$ exec $SHELL -l`  
+参考：[Ubuntuに最新のNode.jsを難なくインストールする](https://qiita.com/seibe/items/36cef7df85fe2cefa3ea)
+
+### package.jsonからlivereloadxをインストール
+`$ cd /home/ubuntu/apps/kakuninsan/html`  
+`$ npm install`
+
+### サービス登録
+`$ sudo nano /etc/systemd/system/monitor_kakuninsan.service`  
+以下入力して保存。  
+`ExecStart`の箇所は、環境によって書き換え。
+```
+[Unit]
+Description=monitor_kakuninsan
+
+[Service]
+Type=simple
+Restart=always
+ExecStart=/home/ubuntu/apps/kakuninsan/html/monitor.sh
+User=ubuntu
+
+[Install]
+WantedBy=multi-user.target
+```
+#### 自動起動有効化
+`$ sudo systemctl enable monitor_kakuninsan`
+#### 手動で起動
+`$ sudo systemctl start monitor_kakuninsan`
+
+`$ systemctl status monitor_kakuninsan.service`
+で、  
+`active (running)`になっていればOK。
+
+### 場合によってはFirewall設定
+`$ sudo ufw allow 35729/tcp`  
+(livereloadxのポート)
 
 ## サンプル
 ![kakuninsample](https://user-images.githubusercontent.com/47170845/81206455-1afa3f00-9007-11ea-8e0d-9fe9e3b7faf2.png)
