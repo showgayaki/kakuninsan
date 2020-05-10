@@ -1,0 +1,6 @@
+{
+  "private": true,
+  "dependencies": {
+    "livereloadx": "^0.3.10"
+  }
+}
