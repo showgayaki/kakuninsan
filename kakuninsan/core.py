@@ -25,7 +25,8 @@ def insert_info(now, computer_name, st_result):
 
 def build_contents(db, cfg, log):
     # データベースからレコード取得
-    records = db.fetch_last_ip(cfg['table_detail']['clm_created_at'])
+    interval_hour = int(cfg['interval_hour']) if cfg['interval_hour'] else 24
+    records = db.fetch_last_ip(cfg['table_detail']['clm_created_at'], interval_hour)
     log.logging('Last IP Address: {}'.format(records[0][1]))
 
     # グラフ画像
@@ -70,18 +71,18 @@ def main():
     log.logging('Started on {}'.format(computer_name))
 
     # スピードテスト
-    options = ['speedtest', '--json', '--share']
-    st = SpeedTest(options)
-    st_result = st.speed_test_result()
-    log.logging('Current IP Address: {}'.format(st_result['global_ip_address']))
-    log.logging('Download Speed: {} bps'.format(int(st_result['download'])))
-    log.logging('Upload Speed: {} bps'.format(int(st_result['upload'])))
+    # options = ['speedtest', '--json', '--share']
+    # st = SpeedTest(options)
+    # st_result = st.speed_test_result()
+    # log.logging('Current IP Address: {}'.format(st_result['global_ip_address']))
+    # log.logging('Download Speed: {} bps'.format(int(st_result['download'])))
+    # log.logging('Upload Speed: {} bps'.format(int(st_result['upload'])))
 
     # Insert
     db = TableIp(cfg['db_info'], cfg['table_detail']['table_name'])
-    insert_dict = insert_info(now, computer_name, st_result)
-    insert_result = db.insert_record(cfg['db_info'], cfg['table_detail'], insert_dict)
-    log.logging('DB insert {}'.format(insert_result))
+    # insert_dict = insert_info(now, computer_name, st_result)
+    # insert_result = db.insert_record(cfg['db_info'], cfg['table_detail'], insert_dict)
+    # log.logging('DB insert {}'.format(insert_result))
 
     # 指定時間になったらメール送信。指定時間以外は、webサーバー動いている環境ならindex.htmlに書き出し
     if now.strftime('%H:%M') == cfg['mail_send_time']:

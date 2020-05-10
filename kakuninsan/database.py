@@ -3,14 +3,13 @@ from mysql import connector
 
 class TableIp:
     def __init__(self, db_dict, table_name):
-        self.RECORD_LIMIT_HOUR = 24
         self.db_dict = db_dict.copy()
         self.table_name = table_name
 
-    def fetch_last_ip(self, clm_created_at):
-        # 直近24時間分取得
+    def fetch_last_ip(self, clm_created_at, interval_hour):
+        # 直近[interval_hour]時間分取得
         sql = 'SELECT * FROM {} WHERE DATE_ADD({}, INTERVAL {} HOUR) > NOW()'.format(
-            self.table_name, clm_created_at, self.RECORD_LIMIT_HOUR
+            self.table_name, clm_created_at, interval_hour
         )
 
         conn = connector.connect(**self.db_dict)

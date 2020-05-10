@@ -23,6 +23,7 @@ def config(current_path):
             , 'clm_created_at': os.environ.get('CLM_CREATED_AT')
             , 'clm_updated_at': os.environ.get('CLM_UPDATED_AT')
         }
+        , 'interval_hour': os.environ.get('INTERVAL_HOUR')
         , 'mail_info': {
             'smtp_server': os.environ.get('SMTP_SERVER')
             , 'smtp_port': os.environ.get('SMTP_PORT')

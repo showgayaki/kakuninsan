@@ -31,6 +31,7 @@ CLM_UPLOAD=[カラム名]
 CLM_IMAGE_URL=[カラム名]
 CLM_CREATED_AT=[カラム名]
 CLM_UPDATED_AT=[カラム名]
+INTERVAL_HOUR=[データ取得で遡る時間: default(空の場合)は24]
 
 SMTP_SERVER=[SMTPサーバー]
 SMTP_PORT=[SMTPポート]
