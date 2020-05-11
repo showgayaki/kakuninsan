@@ -34,7 +34,7 @@ def config(current_path):
         }
         , 'mail_send_time': os.environ.get('MAIL_SEND_TIME')
         , 'web_server': {
-            'is_running': os.environ.get('IS_RUNNING_WEB_SERVER')
+            'is_running': True if os.environ.get('IS_RUNNING_WEB_SERVER') == 'True' else False
             , 'document_root': os.environ.get('DOCUMENT_ROOT')
         }
     }

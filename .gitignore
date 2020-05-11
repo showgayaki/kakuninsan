@@ -3,6 +3,6 @@
 .env
 __pycache__
 log
-.png
+*.png
 index.html
 node_modules

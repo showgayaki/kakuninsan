@@ -61,11 +61,10 @@ class Graph:
         plt.grid(True)
 
         # グラフ画像保存
-        now = datetime.datetime.now()
-        image_dir = os.path.join(Path(os.path.dirname(__file__)).parent, 'img')
+        image_dir = os.path.join(Path(os.path.dirname(__file__)).parent, 'html/img')
         if not os.path.isdir(image_dir):
             os.makedirs(image_dir)
-        image_file_path = os.path.join(image_dir, '{0:%Y-%m-%d_%H-%M-%S}.png'.format(now))
+        image_file_path = os.path.join(image_dir, 'graph.png')
         fig.savefig(image_file_path, bbox_inches="tight")
 
         return image_file_path if os.path.exists(image_file_path) else ''

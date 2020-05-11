@@ -36,16 +36,16 @@ class Html:
         self.env = Environment(loader=FileSystemLoader('.'))
         self.template = self.env.get_template('kakuninsan/templates/base.html')
 
-    def build_html(self, records, image_file_path):
-        if image_file_path:
-            with open(image_file_path, 'rb') as f:
-                data = base64.b64encode(f.read())
-            image = data.decode('utf-8')
-            try:
-                os.remove(image_file_path)
-            except OSError:
-                image = ''
+    def build_html(self, is_web, records, image_file_path):
+        if is_web:
+            dir_name, file_name = os.path.split(image_file_path)
+            image = '{}/{}'.format(os.path.basename(dir_name), file_name)
         else:
-            image = ''
-        contents = self.template.render(records=records, image=image)
+            if image_file_path:
+                with open(image_file_path, 'rb') as f:
+                    data = base64.b64encode(f.read())
+                image = 'data:image/png;base64,{}'.format(data.decode('utf-8'))
+            else:
+                image = ''
+        contents = self.template.render(is_web=is_web, records=records, image=image)
         return contents

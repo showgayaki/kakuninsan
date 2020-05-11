@@ -25,17 +25,8 @@ def insert_info(now, computer_name, st_result):
     return insert_dict
 
 
-def build_contents(db, cfg, log):
-    # データベースからレコード取得
-    interval_hour = int(cfg['interval_hour']) if cfg['interval_hour'] else 24
-    records = db.fetch_last_ip(cfg['table_detail']['clm_created_at'], interval_hour)
-    log.logging('Last IP Address: {}'.format(records[0][1]))
-
-    # グラフ画像
-    graph = Graph(records)
-    image_file_path = graph.draw_graph()
-
-    # IPの更新有無によってメールsubject変更
+def check_ip(records):
+    # IPが更新されてたら配列最後にupdatedを追加
     is_updated = False
     for i, record in enumerate(records):
         if i != len(records) - 1:
@@ -46,20 +37,7 @@ def build_contents(db, cfg, log):
                 record.append('')
         else:
             record.append('')
-    subject = 'IP Address is UPDATED' if is_updated else 'IP Address is NOT updated'
-
-    # コンテンツ作成
-    html = Html()
-    contents = html.build_html(records, image_file_path)
-    # htmlフォルダなかったら作って、index.htmlに書き出し
-    index_dir = os.path.join(cfg['web_server']['document_root'])
-    if not os.path.isdir(index_dir):
-        os.makedirs(index_dir)
-    index_path = os.path.join(index_dir, 'index.html')
-
-    with open(index_path, 'w', encoding='utf-8') as f:
-        f.write(contents)
-    return {'subject': subject, 'body': contents}
+    return is_updated, records
 
 
 def main():
@@ -67,7 +45,6 @@ def main():
     current_dir = os.path.abspath(os.path.dirname(__file__))
     log = Logger(current_dir, 10)
     cfg = config.config(current_dir)
-
     # computer_name取得
     computer_name = socket.gethostname()
     log.logging('Started on {}'.format(computer_name))
@@ -87,17 +64,41 @@ def main():
     insert_result = db.insert_record(cfg['db_info'], cfg['table_detail'], insert_dict)
     log.logging('DB insert {}'.format(insert_result))
 
+    interval_hour = int(cfg['interval_hour']) if cfg['interval_hour'] else 24
+    records = db.fetch_last_ip(cfg['table_detail']['clm_created_at'], interval_hour)
+    log.logging('Last IP Address: {}'.format(records[0][1]))
+
     # 指定時間になったらメール送信。指定時間以外は、webサーバー動いている環境ならindex.htmlに書き出し
+    if now.strftime('%H:%M') == cfg['mail_send_time'] or cfg['web_server']['is_running']:
+        # グラフ画像
+        grph = Graph(records)
+        image_file_path = grph.draw_graph()
+        # コンテンツ作成
+        html = Html()
+
     if now.strftime('%H:%M') == cfg['mail_send_time']:
-        body_dict = build_contents(db, cfg, log)
+        mail_contents = html.build_html(False, records, image_file_path)
+        is_updated, records = check_ip(records)
+        subject = 'IP Address is UPDATED' if is_updated else 'IP Address is NOT updated'
+        body_dict = {'subject': subject, 'body': mail_contents}
         # メール送信
         mailer = Mail(cfg['mail_info'])
         msg = mailer.create_message(body_dict)
         result = mailer.send_mail(msg)
         log.logging('Send Mail {}'.format(result))
-    elif cfg['web_server']['is_running'] == 'True':
-        build_contents(db, cfg, log)
+    else:
         log.logging('It is not time to send an email.')
+
+    if cfg['web_server']['is_running']:
+        is_updated, records = check_ip(records)
+        web_contents = html.build_html(True, records, image_file_path)
+        # htmlフォルダなかったら作って、index.htmlに書き出し
+        index_dir = os.path.join(cfg['web_server']['document_root'])
+        if not os.path.isdir(index_dir):
+            os.makedirs(index_dir)
+        index_path = os.path.join(index_dir, 'index.html')
+        with open(index_path, 'w', encoding='utf-8') as f:
+            f.write(web_contents)
 
     log.logging('Stopped.')
 

@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>確認さん</title>
+    {% if is_web %}
     <link rel="icon" type="image/png" href="favicon.png">
+    {% endif %}
     <style>
         h2{
             width: 50%;
@@ -34,7 +36,7 @@
 </head>
 <body>
     <h2>Fig. SpeedTest</h2>
-    <img src="data:image/png;base64,{{ image }}" alt="Speed Graph">
+    <img src="{{ image }}" alt="Speed Graph">
     <h2>Records</h2>
     <table>
         <thead>
@@ -63,6 +65,7 @@
         </tbody>
     </table>
 </body>
+{% if is_web %}
 <script>
     document.write(
         '<script src="http://' +
@@ -71,4 +74,5 @@
         'script>'
     )
 </script>
+{% endif %}
 </html>
