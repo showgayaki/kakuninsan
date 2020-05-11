@@ -11,7 +11,7 @@ class Graph:
     index:
         download: 2
         upload: 3
-        created_at: 5
+        created_at: 6
     """
     def __init__(self, data):
         self.data = data
@@ -25,7 +25,7 @@ class Graph:
         y_download = []
         y_upload = []
         for d in reversed(self.data):
-            x.append(d[5])
+            x.append(d[6])
             y_download.append(bytes_to_megabytes(d[2]))
             y_upload.append(bytes_to_megabytes(d[3]))
 
@@ -33,8 +33,8 @@ class Graph:
         ax.plot(x, y_upload, 'o-', ms=2, label='Upload')
 
         # x軸目盛線：レコードすべてを含むように
-        dt_max = self.data[0][5].replace(minute=0, second=0, microsecond=0)
-        dt_min = self.data[-1][5].replace(minute=0, second=0, microsecond=0)
+        dt_max = self.data[0][6].replace(minute=0, second=0, microsecond=0)
+        dt_min = self.data[-1][6].replace(minute=0, second=0, microsecond=0)
         x_axis = []
         i = 0
         while True:

@@ -39,7 +39,12 @@
     <table>
         <thead>
             <tr>
-                <th>Datetime</th><th>Computer Name</th><th>IP address</th><th>Download(Mbps)</th><th>Upload(Mbps)</th>
+                <th>Datetime</th>
+                <th>Computer Name</th>
+                <th>IP address</th>
+                <th>Download<br>(Mbps)</th>
+                <th>Upload<br>(Mbps)</th>
+                <th>Sponsor</th>
             </tr>
         </thead>
         <tbody>
@@ -47,7 +52,12 @@
             {% set download = (record[2] / 1000 / 1000) | int %}
             {% set upload = (record[3] / 1000 / 1000) | int %}
             <tr class="{{ record[-1] }}">
-                <td>{{ record[5] }}</td><td>{{ record[0] }}</td><td>{{ record[1] }}</td><td class="download">{{ download }}</td><td class="upload">{{ upload }}</td>
+                <td>{{ record[6] }}</td>
+                <td>{{ record[0] }}</td>
+                <td>{{ record[1] }}</td>
+                <td class="download">{{ download }}</td>
+                <td class="upload">{{ upload }}</td>
+                <td>{{ record[4] }}</td>
             </tr>
             {% endfor %}
         </tbody>

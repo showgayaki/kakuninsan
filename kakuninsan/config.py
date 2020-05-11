@@ -19,6 +19,7 @@ def config(current_path):
             , 'clm_global_ip_address': os.environ.get('CLM_GLOBAL_IP_ADDRESS')
             , 'clm_download': os.environ.get('CLM_DOWNLOAD')
             , 'clm_upload': os.environ.get('CLM_UPLOAD')
+            , 'clm_sponsor': os.environ.get('CLM_SPONSOR')
             , 'clm_image_url': os.environ.get('CLM_IMAGE_URL')
             , 'clm_created_at': os.environ.get('CLM_CREATED_AT')
             , 'clm_updated_at': os.environ.get('CLM_UPDATED_AT')

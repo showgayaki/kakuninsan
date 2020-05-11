@@ -30,9 +30,9 @@ class TableIp:
     def insert_record(self, db_info, clm_dict, data_dict):
         sql = ("INSERT INTO {database}.{table_name} "
                "({clm_computer_name}, {clm_global_ip_address}, {clm_download}, {clm_upload}"
-               ", {clm_image_url}, {clm_created_at}, {clm_updated_at})"
+               ", {clm_sponsor}, {clm_image_url}, {clm_created_at}, {clm_updated_at})"
                " VALUES ('{computer_name}', '{global_ip_address}', {download}"
-               ", {upload}, '{image_url}', '{created_at}', '{updated_at}')").format(
+               ", {upload}, '{sponsor}', '{image_url}', '{created_at}', '{updated_at}')").format(
             **db_info, **clm_dict, **data_dict)
 
         conn = connector.connect(**self.db_dict)

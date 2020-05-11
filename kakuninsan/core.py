@@ -5,6 +5,7 @@ import config
 from speed_test import SpeedTest
 from database import TableIp
 from mail import Mail, Html
+import graph
 from graph import Graph
 from logger import Logger
 
@@ -16,6 +17,7 @@ def insert_info(now, computer_name, st_result):
         , 'global_ip_address': st_result['global_ip_address']
         , 'download': st_result['download']
         , 'upload': st_result['upload']
+        , 'sponsor': st_result['sponsor']
         , 'image_url': st_result['image_url']
         , 'created_at': now
         , 'updated_at': now
@@ -75,8 +77,9 @@ def main():
     st = SpeedTest(options)
     st_result = st.speed_test_result()
     log.logging('Current IP Address: {}'.format(st_result['global_ip_address']))
-    log.logging('Download Speed: {} bps'.format(int(st_result['download'])))
-    log.logging('Upload Speed: {} bps'.format(int(st_result['upload'])))
+    log.logging('Sponsor: {}'.format(st_result['sponsor']))
+    log.logging('Download Speed: {} Mbps'.format(graph.bytes_to_megabytes(st_result['download'])))
+    log.logging('Upload Speed: {} Mbps'.format(graph.bytes_to_megabytes(st_result['upload'])))
 
     # Insert
     db = TableIp(cfg['db_info'], cfg['table_detail']['table_name'])

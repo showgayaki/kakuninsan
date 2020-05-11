@@ -14,6 +14,7 @@ class SpeedTest:
             'download': res_json['download']
             , 'upload': res_json['upload']
             , 'global_ip_address': res_json['client']['ip']
+            , 'sponsor': res_json['server']['sponsor']
             , 'image_url': res_json['share']
         }
         return result_dict
