@@ -42,6 +42,9 @@ MAIL_SEND_TIME=[メール送信する時間 ex)06:00]
 
 IS_RUNNING_WEB_SERVER=[Webサーバーが動いているかどうか:True or False]
 DOCUMENT_ROOT=[HTMLの書き出し場所]
+
+API_URL=[LINE通知用のAPI URL]
+ACCESS_TOKEN=[LINE通知用のtoken]
 ```
 
 ## cron設定

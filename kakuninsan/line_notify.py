@@ -26,4 +26,4 @@ class LineNotify:
             r = requests.post(self.api_url, headers=self.headers, data=payload, files=files)
         except Exception as e:
             return str(e)
-        return r.status_code
+        return 'StatusCode {}'.format(r.status_code)
