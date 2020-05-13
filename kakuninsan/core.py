@@ -118,7 +118,8 @@ def main():
     message = ('\n{:%-m/%-d %H:%M} 現在の回線速度'
                '\n\nダウンロード：{} Mbps'
                '\nアップロード：{} Mbps').format(now, download, upload)
-    post_line(cfg['line']['api_url'], cfg['line']['access_token'], message, image_file_path)
+    post_result = post_line(cfg['line']['api_url'], cfg['line']['access_token'], message, image_file_path)
+    log.logging('LINE result: {}'.format(post_result))
     log.logging('Stopped.')
 
 
