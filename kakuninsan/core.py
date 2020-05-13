@@ -7,6 +7,7 @@ from database import TableIp
 from mail import Mail, Html
 import graph
 from graph import Graph
+from line_notify import LineNotify
 from logger import Logger
 
 
@@ -40,6 +41,17 @@ def check_ip(records):
     return is_updated, records
 
 
+def post_line(api_url, access_token, message, image_file_path):
+    bot = LineNotify(api_url, access_token)
+    payload = {
+        'message': message
+        , 'stickerPackageId': None
+        , 'stickerId': None
+    }
+    image = image_file_path
+    return bot.send_message(payload, image)
+
+
 def main():
     now = datetime.datetime.now()
     current_dir = os.path.abspath(os.path.dirname(__file__))
@@ -55,8 +67,11 @@ def main():
     st_result = st.speed_test_result()
     log.logging('Current IP Address: {}'.format(st_result['global_ip_address']))
     log.logging('Sponsor: {}'.format(st_result['sponsor']))
-    log.logging('Download Speed: {} Mbps'.format(graph.bytes_to_megabytes(st_result['download'])))
-    log.logging('Upload Speed: {} Mbps'.format(graph.bytes_to_megabytes(st_result['upload'])))
+
+    download = graph.bytes_to_megabytes(st_result['download'])
+    upload = graph.bytes_to_megabytes(st_result['upload'])
+    log.logging('Download Speed: {} Mbps'.format(download))
+    log.logging('Upload Speed: {} Mbps'.format(upload))
 
     # Insert
     db = TableIp(cfg['db_info'], cfg['table_detail']['table_name'])
@@ -100,6 +115,10 @@ def main():
         with open(index_path, 'w', encoding='utf-8') as f:
             f.write(web_contents)
 
+    message = ('\n{:%-m/%-d %H:%M} 現在の回線速度'
+               '\n\nダウンロード：{} Mbps'
+               '\nアップロード：{} Mbps').format(now, download, upload)
+    post_line(cfg['line']['api_url'], cfg['line']['access_token'], message, image_file_path)
     log.logging('Stopped.')
 
 

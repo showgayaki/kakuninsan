@@ -37,5 +37,9 @@ def config(current_path):
             'is_running': True if os.environ.get('IS_RUNNING_WEB_SERVER') == 'True' else False
             , 'document_root': os.environ.get('DOCUMENT_ROOT')
         }
+        , 'line': {
+            'api_url': os.environ.get('API_URL')
+            , 'access_token': os.environ.get('ACCESS_TOKEN')
+        }
     }
     return conf
