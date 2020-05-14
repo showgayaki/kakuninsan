@@ -65,7 +65,8 @@ def main():
     options = ['speedtest', '--json', '--share']
     st = SpeedTest(options)
     st_result = st.speed_test_result()
-    log.logging('Current IP Address: {}'.format(st_result['global_ip_address']))
+    current_ip = st_result['global_ip_address']
+    log.logging('Current IP Address: {}'.format(current_ip))
     log.logging('Sponsor: {}'.format(st_result['sponsor']))
 
     download = graph.bytes_to_megabytes(st_result['download'])
@@ -81,7 +82,8 @@ def main():
 
     interval_hour = int(cfg['interval_hour']) if cfg['interval_hour'] else 24
     records = db.fetch_last_ip(cfg['table_detail']['clm_created_at'], interval_hour)
-    log.logging('Last IP Address: {}'.format(records[0][1]))
+    last_ip = records[0][1]
+    log.logging('Last IP Address: {}'.format(last_ip))
 
     # 指定時間になったらメール送信。指定時間以外は、webサーバー動いている環境ならindex.htmlに書き出し
     if now.strftime('%H:%M') == cfg['mail_send_time'] or cfg['web_server']['is_running']:
@@ -118,6 +120,10 @@ def main():
     message = ('\n{:%-m/%-d %H:%M} 現在の回線速度'
                '\n\nダウンロード：{} Mbps'
                '\nアップロード：{} Mbps').format(now, download, upload)
+    if last_ip != current_ip:
+        message += ('\n\nあと、IP変わったみたいです。'
+                    '\n{} --> {}').format(last_ip, current_ip)
+        log.logging('IP address is updated: {} --> {}'.format(last_ip, current_ip))
     post_result = post_line(cfg['line']['api_url'], cfg['line']['access_token'], message, image_file_path)
     log.logging('LINE result: {}'.format(post_result))
     log.logging('Stopped.')
