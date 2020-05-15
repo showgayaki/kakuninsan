@@ -82,7 +82,8 @@ def main():
 
     interval_hour = int(cfg['interval_hour']) if cfg['interval_hour'] else 24
     records = db.fetch_last_ip(cfg['table_detail']['clm_created_at'], interval_hour)
-    last_ip = records[0][1]
+    # 前回のIPは、今回インサートしたものの一つ前(listの2番目)のレコード
+    last_ip = records[1][1]
     log.logging('Last IP Address: {}'.format(last_ip))
 
     # 指定時間になったらメール送信。指定時間以外は、webサーバー動いている環境ならindex.htmlに書き出し
