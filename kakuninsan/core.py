@@ -94,8 +94,8 @@ def main():
         html = Html()
 
     if now.strftime('%H:%M') == cfg['mail_send_time']:
-        mail_contents = html.build_html(False, records, image_file_path)
         is_updated, records = check_ip(records)
+        mail_contents = html.build_html(False, records, image_file_path)
         subject = 'IP Address is UPDATED' if is_updated else 'IP Address is NOT updated'
         body_dict = {'subject': subject, 'body': mail_contents}
         # メール送信
