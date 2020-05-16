@@ -86,8 +86,8 @@ def main():
     last_ip = records[1][1]
     log.logging('Last IP Address: {}'.format(last_ip))
 
-    is_send_time = now.strftime('%H:%M') == cfg['mail_send_time']
-    is_post_time = now.strftime('%H:%M') == cfg['line']['post_time']
+    is_send_time = now.strftime('%H') == cfg['mail_send_time']
+    is_post_time = now.strftime('%H') == cfg['line']['post_time']
     # 指定時間になったらメール送信 or LINEで通知。指定時間以外は、webサーバー動いている環境ならindex.htmlに書き出し
     if is_send_time or is_post_time or cfg['web_server']['is_running']:
         # グラフ画像

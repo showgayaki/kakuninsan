@@ -38,13 +38,14 @@ SMTP_PORT=[SMTPポート]
 SMTP_USER=[送信元メールアドレス]
 SMTP_PASS=[送信元メールアドレスのパスワード]
 MAIL_TO=[送信先メールアドレス]
-MAIL_SEND_TIME=[メール送信する時間 ex)06:00]
+MAIL_SEND_TIME=[メール送信する時間：00〜24]
 
 IS_RUNNING_WEB_SERVER=[Webサーバーが動いているかどうか:True or False]
 DOCUMENT_ROOT=[HTMLの書き出し場所]
 
 API_URL=[LINE通知用のAPI URL]
 ACCESS_TOKEN=[LINE通知用のtoken]
+LINE_POST_TIME=[LINEで通知する時間：00〜24]
 ```
 
 ## cron設定
