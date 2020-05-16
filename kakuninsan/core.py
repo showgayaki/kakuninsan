@@ -41,10 +41,10 @@ def check_ip(records):
     return is_updated, records
 
 
-def post_line(api_url, access_token, message, image_file_path):
+def post_line(api_url, access_token, image_file_path):
     bot = LineNotify(api_url, access_token)
     payload = {
-        'message': message
+        'message': '本日の回線速度'
         , 'stickerPackageId': None
         , 'stickerId': None
     }
@@ -86,15 +86,17 @@ def main():
     last_ip = records[1][1]
     log.logging('Last IP Address: {}'.format(last_ip))
 
-    # 指定時間になったらメール送信。指定時間以外は、webサーバー動いている環境ならindex.htmlに書き出し
-    if now.strftime('%H:%M') == cfg['mail_send_time'] or cfg['web_server']['is_running']:
+    is_send_time = now.strftime('%H:%M') == cfg['mail_send_time']
+    is_post_time = now.strftime('%H:%M') == cfg['line']['post_time']
+    # 指定時間になったらメール送信 or LINEで通知。指定時間以外は、webサーバー動いている環境ならindex.htmlに書き出し
+    if is_send_time or is_post_time or cfg['web_server']['is_running']:
         # グラフ画像
         grph = Graph(records)
         image_file_path = grph.draw_graph()
         # コンテンツ作成
         html = Html()
 
-    if now.strftime('%H:%M') == cfg['mail_send_time']:
+    if is_send_time:
         is_updated, records = check_ip(records)
         mail_contents = html.build_html(False, records, image_file_path)
         subject = 'IP Address is UPDATED' if is_updated else 'IP Address is NOT updated'
@@ -118,15 +120,10 @@ def main():
         with open(index_path, 'w', encoding='utf-8') as f:
             f.write(web_contents)
 
-    message = ('\n{:%-m/%-d %H:%M} 現在の回線速度'
-               '\n\nダウンロード：{} Mbps'
-               '\nアップロード：{} Mbps').format(now, download, upload)
-    if last_ip != current_ip:
-        message += ('\n\nあと、IP変わったみたいです。'
-                    '\n{} --> {}').format(last_ip, current_ip)
-        log.logging('IP address is updated: {} --> {}'.format(last_ip, current_ip))
-    post_result = post_line(cfg['line']['api_url'], cfg['line']['access_token'], message, image_file_path)
-    log.logging('LINE result: {}'.format(post_result))
+    if is_post_time:
+        post_result = post_line(cfg['line']['api_url'], cfg['line']['access_token'], image_file_path)
+        log.logging('LINE result: {}'.format(post_result))
+
     log.logging('Stopped.')
 
 

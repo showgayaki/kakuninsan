@@ -40,6 +40,7 @@ def config(current_path):
         , 'line': {
             'api_url': os.environ.get('API_URL')
             , 'access_token': os.environ.get('ACCESS_TOKEN')
+            , 'post_time': os.environ.get('LINE_POST_TIME')
         }
     }
     return conf
