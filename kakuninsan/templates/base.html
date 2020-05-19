@@ -6,6 +6,7 @@
     <title>確認さん</title>
     {% if is_web %}
     <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="css/style.css">
     {% endif %}
     <style>
         h2{
@@ -35,35 +36,42 @@
     </style>
 </head>
 <body>
-    <h2>Fig. SpeedTest</h2>
-    <img src="{{ image }}" alt="Speed Graph">
-    <h2>Records</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Datetime</th>
-                <th>Computer Name</th>
-                <th>IP address</th>
-                <th>Download<br>(Mbps)</th>
-                <th>Upload<br>(Mbps)</th>
-                <th>Sponsor</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for record in records %}
-            {% set download = (record[2] / 1000 / 1000) | int %}
-            {% set upload = (record[3] / 1000 / 1000) | int %}
-            <tr class="{{ record[-1] }}">
-                <td>{{ record[6] }}</td>
-                <td>{{ record[0] }}</td>
-                <td>{{ record[1] }}</td>
-                <td class="download">{{ download }}</td>
-                <td class="upload">{{ upload }}</td>
-                <td>{{ record[4] }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    {% if is_web %}
+    <div id="loading">
+        <img src="img/loading.gif" alt="loading">
+    </div>
+    {% endif %}
+    <div id="contents" class="hidden">
+        <h2>Fig. SpeedTest</h2>
+        <img src="{{ image }}" alt="Speed Graph">
+        <h2>Records</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Datetime</th>
+                    <th>Computer Name</th>
+                    <th>IP address</th>
+                    <th>Download<br>(Mbps)</th>
+                    <th>Upload<br>(Mbps)</th>
+                    <th>Sponsor</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in records %}
+                {% set download = (record[2] / 1000 / 1000) | int %}
+                {% set upload = (record[3] / 1000 / 1000) | int %}
+                <tr class="{{ record[-1] }}">
+                    <td>{{ record[6] }}</td>
+                    <td>{{ record[0] }}</td>
+                    <td>{{ record[1] }}</td>
+                    <td class="download">{{ download }}</td>
+                    <td class="upload">{{ upload }}</td>
+                    <td>{{ record[4] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </body>
 {% if is_web %}
 <script>
@@ -73,6 +81,14 @@
         ':35729/livereload.js?snipver=1"></' +
         'script>'
     )
+    var loading = document.getElementById('loading');
+    var contents = document.getElementById('contents');
+    window.addEventListener('load', function(){
+        setTimeout(function(){
+            loading.style.display = 'none';
+            contents.classList.remove('hidden');
+        }, 1500);
+    }, false);
 </script>
 {% endif %}
 </html>

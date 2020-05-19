@@ -1,0 +1,27 @@
+.hidden{
+    display: none;
+}
+#loading{
+    width: 100%;
+    height: 100vh;
+    background-color: #fff;
+    position: absolute;
+}
+#loading img{
+    position:absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+#contents{
+    animation : fadeIn 1s;
+    animation-fill-mode: both;
+}
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}

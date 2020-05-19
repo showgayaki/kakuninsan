@@ -96,33 +96,33 @@ def main():
         # コンテンツ作成
         html = Html()
 
-    if is_send_time:
-        is_updated, records = check_ip(records)
-        mail_contents = html.build_html(False, records, image_file_path)
-        subject = 'IP Address is UPDATED' if is_updated else 'IP Address is NOT updated'
-        body_dict = {'subject': subject, 'body': mail_contents}
-        # メール送信
-        mailer = Mail(cfg['mail_info'])
-        msg = mailer.create_message(body_dict)
-        result = mailer.send_mail(msg)
-        log.logging('Send Mail {}'.format(result))
-    else:
-        log.logging('It is not time to send an email.')
+        if is_send_time:
+            is_updated, records = check_ip(records)
+            mail_contents = html.build_html(False, records, image_file_path)
+            subject = 'IP Address is UPDATED' if is_updated else 'IP Address is NOT updated'
+            body_dict = {'subject': subject, 'body': mail_contents}
+            # メール送信
+            mailer = Mail(cfg['mail_info'])
+            msg = mailer.create_message(body_dict)
+            result = mailer.send_mail(msg)
+            log.logging('Send Mail {}'.format(result))
+        else:
+            log.logging('It is not time to send an email.')
 
-    if cfg['web_server']['is_running']:
-        is_updated, records = check_ip(records)
-        web_contents = html.build_html(True, records, image_file_path)
-        # htmlフォルダなかったら作って、index.htmlに書き出し
-        index_dir = os.path.join(cfg['web_server']['document_root'])
-        if not os.path.isdir(index_dir):
-            os.makedirs(index_dir)
-        index_path = os.path.join(index_dir, 'index.html')
-        with open(index_path, 'w', encoding='utf-8') as f:
-            f.write(web_contents)
+        if cfg['web_server']['is_running']:
+            is_updated, records = check_ip(records)
+            web_contents = html.build_html(True, records, image_file_path)
+            # htmlフォルダなかったら作って、index.htmlに書き出し
+            index_dir = os.path.join(cfg['web_server']['document_root'])
+            if not os.path.isdir(index_dir):
+                os.makedirs(index_dir)
+            index_path = os.path.join(index_dir, 'index.html')
+            with open(index_path, 'w', encoding='utf-8') as f:
+                f.write(web_contents)
 
-    if is_post_time:
-        post_result = post_line(cfg['line']['api_url'], cfg['line']['access_token'], image_file_path)
-        log.logging('LINE result: {}'.format(post_result))
+        if is_post_time:
+            post_result = post_line(cfg['line']['api_url'], cfg['line']['access_token'], image_file_path)
+            log.logging('LINE result: {}'.format(post_result))
 
     log.logging('Stopped.')
 
