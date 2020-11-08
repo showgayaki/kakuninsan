@@ -61,24 +61,30 @@ def main():
     computer_name = socket.gethostname()
     log.logging('Started on {}'.format(computer_name))
 
+    # DBインスタンス
+    db = TableIp(cfg['db_info'], cfg['table_detail']['table_name'])
+
     # スピードテスト
     options = ['speedtest', '--json', '--share']
     st = SpeedTest(options)
     st_result = st.speed_test_result()
-    current_ip = st_result['global_ip_address']
-    log.logging('Current IP Address: {}'.format(current_ip))
-    log.logging('Sponsor: {}'.format(st_result['sponsor']))
 
-    download = graph.bytes_to_megabytes(st_result['download'])
-    upload = graph.bytes_to_megabytes(st_result['upload'])
-    log.logging('Download Speed: {} Mbps'.format(download))
-    log.logging('Upload Speed: {} Mbps'.format(upload))
+    if 'Error' in st_result.keys():
+        log.logging('SpeedTest Failed: {}'.format(st_result['Error']))
+    else:
+        current_ip = st_result['global_ip_address']
+        log.logging('Current IP Address: {}'.format(current_ip))
+        log.logging('Sponsor: {}'.format(st_result['sponsor']))
 
-    # Insert
-    db = TableIp(cfg['db_info'], cfg['table_detail']['table_name'])
-    insert_dict = insert_info(now, computer_name, st_result)
-    insert_result = db.insert_record(cfg['db_info'], cfg['table_detail'], insert_dict)
-    log.logging('DB insert {}'.format(insert_result))
+        download = graph.bytes_to_megabytes(st_result['download'])
+        upload = graph.bytes_to_megabytes(st_result['upload'])
+        log.logging('Download Speed: {} Mbps'.format(download))
+        log.logging('Upload Speed: {} Mbps'.format(upload))
+
+        # Insert
+        insert_dict = insert_info(now, computer_name, st_result)
+        insert_result = db.insert_record(cfg['db_info'], cfg['table_detail'], insert_dict)
+        log.logging('DB insert {}'.format(insert_result))
 
     interval_hour = int(cfg['interval_hour']) if cfg['interval_hour'] else 24
     records = db.fetch_last_ip(cfg['table_detail']['clm_created_at'], interval_hour)
