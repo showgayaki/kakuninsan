@@ -1,6 +1,7 @@
 {
   "private": true,
   "dependencies": {
-    "livereloadx": "^0.3.10"
+    "livereloadx": "^0.3.10",
+    "http-proxy": ">=1.18.1"
   }
 }
