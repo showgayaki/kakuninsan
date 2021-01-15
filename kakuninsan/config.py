@@ -3,8 +3,8 @@ from dotenv import load_dotenv
 from pathlib import Path
 
 
-def config(current_path):
-    dotenv_path = os.path.join(Path(current_path).resolve().parents[0], '.env')
+def config(root_dir):
+    dotenv_path = Path(root_dir).joinpath('.env')
     load_dotenv(dotenv_path)
     conf = {
         'db_info': {

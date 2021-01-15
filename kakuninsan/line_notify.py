@@ -23,7 +23,10 @@ class LineNotify:
             files = {'imageFile': open(image, 'rb')}
 
         try:
-            r = requests.post(self.api_url, headers=self.headers, data=payload, files=files)
+            res = requests.post(self.api_url, headers=self.headers, data=payload, files=files)
+            status_code = res.status_code
         except Exception as e:
-            return str(e)
-        return 'StatusCode {}'.format(r.status_code)
+            return 'Error: {}'.format(e)
+        else:
+            res.close()
+            return 'StatusCode: {}'.format(status_code)

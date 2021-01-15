@@ -32,8 +32,8 @@ class Mail:
 
 
 class Html:
-    def __init__(self):
-        self.env = Environment(loader=FileSystemLoader('.'))
+    def __init__(self, root_dir):
+        self.env = Environment(loader=FileSystemLoader(root_dir))
         self.template = self.env.get_template('kakuninsan/templates/base.html')
 
     def build_html(self, is_web, records, image_file_path):
