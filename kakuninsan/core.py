@@ -55,7 +55,7 @@ def post_line(api_url, access_token, image_file_path):
 
 def main():
     now = datetime.datetime.now()
-    root_dir = Path(__file__).parents[1]
+    root_dir = Path(__file__).resolve().parents[1]
     log = Logger(root_dir)
     cfg = config.config(root_dir)
     # computer_name取得

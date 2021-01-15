@@ -4,7 +4,7 @@ from pathlib import Path
 
 
 def config(root_dir):
-    dotenv_path = Path(root_dir).joinpath('.env')
+    dotenv_path = Path(root_dir).resolve().joinpath('.env')
     load_dotenv(dotenv_path)
     conf = {
         'db_info': {

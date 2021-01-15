@@ -7,8 +7,8 @@ class Logger:
         self.logger = getLogger(name)
         formatter = Formatter("[%(asctime)s] [%(process)d] [%(levelname)s] %(message)s")
 
-        # /[root_dir]/log/[app_name]/[app_name].logに出力
-        root_dir = Path(root_dir)
+        # /[root_dir]/log/[app_name].logに出力
+        root_dir = Path(root_dir).resolve()
         dir_name = root_dir.name
         log_dir = Path.joinpath(Path(root_dir).resolve(), 'log')
         # logフォルダ無かったら作成
