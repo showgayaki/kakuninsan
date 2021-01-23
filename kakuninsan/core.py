@@ -68,12 +68,13 @@ def main():
 
     # スピードテスト
     retry_count = 3
-    options = ['speedtest', '--json', '--share']
-    st = SpeedTest(options)
+    st = SpeedTest()
+    server_list = st.sponsor()
+    log.logging(level, 'Server list: {}'.format(server_list))
     for i in range(1, retry_count + 1):
         level = 'info'
         log.logging(level, 'Start SpeedTest, count: {}'.format(i))
-        st_result = st.speed_test_result()
+        st_result = st.speed_test_result(server_list)
 
         if 'Error' in st_result.keys():
             level = 'error'
