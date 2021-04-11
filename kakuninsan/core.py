@@ -79,9 +79,9 @@ def main():
 
     for i in range(1, retry_count + 1):
         level = 'info'
-        log.logging(level, 'Start SpeedTest, count: {}'.format(i))
-
         for server_id in server_ids:
+            log.logging(level, 'Start SpeedTest at [{}], count: {}'
+                        .format(server_list[server_id]['sponsor'], i))
             st_result = st.speed_test_result(server_id)
 
             if 'Error' in st_result.keys():
@@ -92,7 +92,6 @@ def main():
             else:
                 current_ip = st_result['global_ip_address']
                 log.logging(level, 'Current IP Address: {}'.format(current_ip))
-                log.logging(level, 'Sponsor: {}'.format(st_result['sponsor']))
 
                 download = graph.bytes_to_megabytes(st_result['download'])
                 upload = graph.bytes_to_megabytes(st_result['upload'])

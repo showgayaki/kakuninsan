@@ -15,7 +15,7 @@ class SpeedTest:
         # Serverを抜き出してリスト化
         server_list = {}
         for server in p2.communicate()[0].split('\n')[:self.SERVER_COUNT]:
-            # 14623) IPA CyberLab (Bunkyo, Japan)[2.47 km]
+            # 14623) IPA CyberLab (Bunkyo, Japan)[**.** km]
             # 上記の形で出力されるので、整形してdictにする
             server_id = server.split(') ')[0]
             server_list[server_id] = {}
