@@ -18,10 +18,13 @@ class SpeedTest:
             # 14623) IPA CyberLab (Bunkyo, Japan)[**.** km]
             # 上記の形で出力されるので、整形してdictにする
             server_id = server.split(') ')[0]
-            server_list[server_id] = {}
-            server_list[server_id]['sponsor'] = server.split(') ')[1].split(' (')[0]
-            server_list[server_id]['server_area'] = server.split(') ')[1].split(' (')[1]
-            server_list[server_id]['distance'] = server.split(') ')[2].replace('[', '').replace(']', '')
+            try:
+                server_list[server_id] = {}
+                server_list[server_id]['sponsor'] = server.split(') ')[1].split(' (')[0]
+                server_list[server_id]['server_area'] = server.split(') ')[1].split(' (')[1]
+                server_list[server_id]['distance'] = server.split(') ')[2].replace('[', '').replace(']', '')
+            except IndexError:
+                del server_list[server_id]
 
         return server_list
 
