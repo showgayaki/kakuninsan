@@ -15,14 +15,14 @@ from logger import Logger
 def insert_info(now, computer_name, st_result):
     now = now.strftime('%Y-%m-%d_%H:%M:%S')
     insert_dict = {
-        'computer_name': computer_name
-        , 'global_ip_address': st_result['global_ip_address']
-        , 'download': st_result['download']
-        , 'upload': st_result['upload']
-        , 'sponsor': st_result['sponsor']
-        , 'image_url': st_result['image_url']
-        , 'created_at': now
-        , 'updated_at': now
+        'computer_name': computer_name,
+        'global_ip_address': st_result['global_ip_address'],
+        'download': st_result['download'],
+        'upload': st_result['upload'],
+        'sponsor': st_result['sponsor'],
+        'image_url': st_result['image_url'],
+        'created_at': now,
+        'updated_at': now
     }
     return insert_dict
 
@@ -45,9 +45,9 @@ def check_ip(records):
 def post_line(api_url, access_token, image_file_path):
     bot = LineNotify(api_url, access_token)
     payload = {
-        'message': '本日の回線速度'
-        , 'stickerPackageId': None
-        , 'stickerId': None
+        'message': '本日の回線速度',
+        'stickerPackageId': None,
+        'stickerId': None
     }
     image = image_file_path
     return bot.send_message(payload, image)
