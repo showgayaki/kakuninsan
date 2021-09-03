@@ -67,7 +67,8 @@ def main():
     db = TableIp(cfg['db_info'], cfg['table_detail']['table_name'])
 
     # スピードテスト
-    retry_count = 3
+    RETRY_COUNT = 3
+    SLEEP_SECOND = 5
     st = SpeedTest()
     log.logging(level, '---Server list---')
     server_list = st.sponsor()
@@ -77,9 +78,9 @@ def main():
         log.logging(level, 'Server{}: {}'.format(i + 1, item))
     log.logging(level, '-----------------')
 
-    for i in range(1, retry_count + 1):
+    for server_id in server_ids:
         level = 'info'
-        for server_id in server_ids:
+        for i in range(1, RETRY_COUNT + 1):
             log.logging(level, 'Start SpeedTest at [{}], count: {}'
                         .format(server_list[server_id]['sponsor'], i))
             st_result = st.speed_test_result(server_id)
@@ -87,7 +88,8 @@ def main():
             if 'Error' in st_result.keys():
                 level = 'error'
                 log.logging(level, 'SpeedTest Failed: {}'.format(st_result['Error']))
-                time.sleep(3)
+                log.logging(level, 'Pause for {} Second.'.format(SLEEP_SECOND))
+                time.sleep(SLEEP_SECOND)
                 continue
             else:
                 current_ip = st_result['global_ip_address']
