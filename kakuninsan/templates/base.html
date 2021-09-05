@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>確認さん</title>
-    {% if is_web %}
+    {%- if is_web %}
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="stylesheet" href="css/style.css">
-    {% endif %}
+    {%- endif %}
     <style>
         h2{
             width: 50%;
@@ -36,11 +36,11 @@
     </style>
 </head>
 <body>
-    {% if is_web %}
+    {%- if is_web %}
     <div id="loading">
         <img src="img/loading.gif" alt="loading">
     </div>
-    {% endif %}
+    {%- endif %}
     <div id="contents" class="hidden">
         <h2>Fig. SpeedTest</h2>
         <img src="{{ image }}" alt="Speed Graph">
@@ -57,10 +57,14 @@
                 </tr>
             </thead>
             <tbody>
-                {% for record in records %}
-                {% set download = (record[2] / 1000 / 1000) | int %}
-                {% set upload = (record[3] / 1000 / 1000) | int %}
+                {%- for record in records %}
+                {%- set download = (record[2] / 1000 / 1000) | int %}
+                {%- set upload = (record[3] / 1000 / 1000) | int %}
+                {%- if record[-1] == 'update' %}
                 <tr class="{{ record[-1] }}">
+                {%- else %}
+                <tr>
+                {%- endif %}
                     <td>{{ record[6] }}</td>
                     <td>{{ record[0] }}</td>
                     <td>{{ record[1] }}</td>
@@ -68,11 +72,11 @@
                     <td class="upload">{{ upload }}</td>
                     <td>{{ record[4] }}</td>
                 </tr>
-                {% endfor %}
+                {%- endfor %}
             </tbody>
         </table>
     </div>
-    {% if is_web %}
+    {%- if is_web %}
     <script>
         document.write(
             '<script src="http://' +
@@ -89,6 +93,6 @@
             }, 1500);
         }, false);
     </script>
-    {% endif %}
+    {%- endif %}
 </body>
 </html>
