@@ -84,8 +84,8 @@ def main():
     for server_id in server_ids:
         for i in range(1, int(cfg['speedtest']['retry_count']) + 1):
             level = 'info'
-            log.logging(level, 'Start SpeedTest on Server{}[id: {}, sponsor: {}], count: {}'
-                        .format(i, server_id, server_list[server_id]['sponsor'], i))
+            log.logging(level, 'Start SpeedTest on Server[id: {}, sponsor: {}], count: {}'
+                        .format(server_id, server_list[server_id]['sponsor'], i))
             st_result = st.speed_test_result(server_id)
 
             if 'Error' in st_result.keys():
