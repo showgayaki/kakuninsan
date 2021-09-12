@@ -86,10 +86,11 @@ def main():
             if 'Error' in st_result.keys():
                 level = 'error'
                 log.logging(level, 'SpeedTest Failed: {}'.format(st_result['Error']))
-                log.logging(level, 'Pause for {} Second.'.format(cfg['speedtest']['interval_seconds']))
+                log.logging(level, 'Pause for {} Seconds.'.format(cfg['speedtest']['interval_seconds']))
                 time.sleep(int(cfg['speedtest']['interval_seconds']))
                 continue
             else:
+                level = 'info'
                 current_ip = st_result['global_ip_address']
                 log.logging(level, 'Current IP Address: {}'.format(current_ip))
 
