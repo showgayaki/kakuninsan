@@ -6,7 +6,7 @@ import re
 class SpeedTest:
     def __init__(self):
         self.SERVER_COUNT = 3
-        self.options = ['speedtest', '--json', '--share']
+        self.OPTIONS = ['speedtest', '--json', '--share']
 
     def sponsor(self):
         # 日本のサーバーを取得
@@ -58,12 +58,14 @@ class SpeedTest:
         return server_list
 
     def speed_test_result(self, server_id):
+        options = []
         if server_id != '0':
-            self.options.append('--server')
-            self.options.append(server_id)
+            options.extend(self.OPTIONS)
+            options.append('--server')
+            options.append(server_id)
         result_dict = {}
         try:
-            process = subprocess.run(self.options, encoding='utf-8', stdout=subprocess.PIPE)
+            process = subprocess.run(options, encoding='utf-8', stdout=subprocess.PIPE)
             result = [line for line in process.stdout.split('\n')]
             res_json = json.loads(result[0])
             result_dict = {

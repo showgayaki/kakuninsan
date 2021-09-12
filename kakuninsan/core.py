@@ -61,26 +61,31 @@ def main():
     # computer_name取得
     computer_name = socket.gethostname()
     level = 'info'
-    log.logging(level, 'Kakuninsan Started on {}'.format(computer_name))
+    log.logging(level, '===== Kakuninsan Started on {} ====='.format(computer_name))
 
     # DBインスタンス
     db = TableIp(cfg['db_info'], cfg['table_detail']['table_name'])
 
     # スピードテスト
     st = SpeedTest()
-    log.logging(level, '---Server list---')
+    log.logging(level, 'Fetch Server list.')
     server_list = st.sponsor()
+    log.logging(level, '---Server list---')
     server_ids = []
     for i, item in enumerate(server_list.items()):
         server_ids.append(item[0])
         log.logging(level, 'Server{}: {}'.format(i + 1, item))
     log.logging(level, '-----------------')
 
+    # test_server = {'20976': {'sponsor': 'GLBB Japan', 'server_area': 'Tokyo, Japan', 'distance': '2.12 km'}}
+    # server_ids.insert(0, '20976')
+    # server_list.update(test_server)
+
     for server_id in server_ids:
-        level = 'info'
-        for i in range(1, int(cfg['speedtest']['retry_count'] )+ 1):
-            log.logging(level, 'Start SpeedTest at [id:{}, sponsor{}], count: {}'
-                        .format(server_id, server_list[server_id]['sponsor'], i))
+        for i in range(1, int(cfg['speedtest']['retry_count']) + 1):
+            level = 'info'
+            log.logging(level, 'Start SpeedTest on Server{}[id: {}, sponsor: {}], count: {}'
+                        .format(i, server_id, server_list[server_id]['sponsor'], i))
             st_result = st.speed_test_result(server_id)
 
             if 'Error' in st_result.keys():
@@ -113,8 +118,11 @@ def main():
                 # 前回のIPは、今回インサートしたものの一つ前(listの2番目)のレコード
                 last_ip = records[1][1]
                 log.logging(level, 'Last IP Address: {}'.format(last_ip))
+                level = 'info'
                 break
-        break
+        # スピードテストが成功したらループ抜ける
+        if level == 'info':
+            break
 
     is_send_time = now.strftime('%H') == cfg['mail_send_time']
     is_post_time = now.strftime('%H') == cfg['line']['post_time']
@@ -155,12 +163,15 @@ def main():
                 f.write(web_contents)
 
         if is_post_time:
+            log.logging(level, 'Start post to LINE.')
             post_result = post_line(cfg['line']['api_url'], cfg['line']['access_token'], image_file_path)
             level = 'error' if 'Error' in post_result else 'info'
             log.logging(level, 'LINE result: {}'.format(post_result))
+        else:
+            log.logging(level, 'It is not time to post to LINE.')
 
     level = 'info'
-    log.logging(level, 'Kakuninsan Stopped.')
+    log.logging(level, '===== Kakuninsan Stopped. =====')
 
 
 if __name__ == '__main__':

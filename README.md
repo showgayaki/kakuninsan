@@ -46,6 +46,9 @@ DOCUMENT_ROOT=[HTMLの書き出し場所]
 API_URL=[LINE通知用のAPI URL]
 ACCESS_TOKEN=[LINE通知用のtoken]
 LINE_POST_TIME=[LINEで通知する時間：00〜24]
+
+SPEEDTEST_RETRY_COUNT=[スピードテスト試行回数 / Server]
+SPEEDTEST_INTERVAL_SECONDS=[スピードテスト失敗時のインターバル秒数]
 ```
 
 ## cron設定
