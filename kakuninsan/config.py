@@ -41,6 +41,10 @@ def config(root_dir):
             'api_url': os.environ.get('API_URL'),
             'access_token': os.environ.get('ACCESS_TOKEN'),
             'post_time': os.environ.get('LINE_POST_TIME')
+        },
+        'speedtest':{
+            'retry_count': os.environ.get('SPEEDTEST_RETRY_COUNT'),
+            'interval_seconds': os.environ.get('SPEEDTEST_INTERVAL_SECONDS')
         }
     }
     return conf

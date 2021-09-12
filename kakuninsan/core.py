@@ -67,8 +67,6 @@ def main():
     db = TableIp(cfg['db_info'], cfg['table_detail']['table_name'])
 
     # スピードテスト
-    RETRY_COUNT = 3
-    SLEEP_SECOND = 5
     st = SpeedTest()
     log.logging(level, '---Server list---')
     server_list = st.sponsor()
@@ -80,16 +78,16 @@ def main():
 
     for server_id in server_ids:
         level = 'info'
-        for i in range(1, RETRY_COUNT + 1):
-            log.logging(level, 'Start SpeedTest at [{}], count: {}'
-                        .format(server_list[server_id]['sponsor'], i))
+        for i in range(1, int(cfg['speedtest']['retry_count'] )+ 1):
+            log.logging(level, 'Start SpeedTest at [id:{}, sponsor{}], count: {}'
+                        .format(server_id, server_list[server_id]['sponsor'], i))
             st_result = st.speed_test_result(server_id)
 
             if 'Error' in st_result.keys():
                 level = 'error'
                 log.logging(level, 'SpeedTest Failed: {}'.format(st_result['Error']))
-                log.logging(level, 'Pause for {} Second.'.format(SLEEP_SECOND))
-                time.sleep(SLEEP_SECOND)
+                log.logging(level, 'Pause for {} Second.'.format(cfg['speedtest']['interval_seconds']))
+                time.sleep(int(cfg['speedtest']['interval_seconds']))
                 continue
             else:
                 current_ip = st_result['global_ip_address']
@@ -114,51 +112,51 @@ def main():
                 # 前回のIPは、今回インサートしたものの一つ前(listの2番目)のレコード
                 last_ip = records[1][1]
                 log.logging(level, 'Last IP Address: {}'.format(last_ip))
-
-                is_send_time = now.strftime('%H') == cfg['mail_send_time']
-                is_post_time = now.strftime('%H') == cfg['line']['post_time']
-                # 指定時間になったらメール送信 or LINEで通知。指定時間以外は、webサーバー動いている環境ならindex.htmlに書き出し
-                if is_send_time or is_post_time or cfg['web_server']['is_running']:
-                    level = 'info'
-                    # グラフ画像
-                    grph = Graph(records)
-                    image_file_path = grph.draw_graph()
-                    # コンテンツ作成
-                    html = Html(root_dir)
-
-                    if is_send_time:
-                        log.logging(level, 'It is time to send an email')
-                        is_updated, records = check_ip(records)
-                        mail_contents = html.build_html(False, records, image_file_path)
-                        subject = 'IP Address is UPDATED' if is_updated else 'IP Address is NOT updated'
-                        body_dict = {'subject': subject, 'body': mail_contents}
-                        # メール送信
-                        log.logging(level, 'Start to send email')
-                        mailer = Mail(cfg['mail_info'])
-                        msg = mailer.create_message(body_dict)
-                        result = mailer.send_mail(msg)
-                        level = 'error' if 'Error' in result else 'info'
-                        log.logging(level, 'Send Mail Result {}'.format(result))
-                    else:
-                        log.logging(level, 'It is not time to send an email')
-
-                    if cfg['web_server']['is_running']:
-                        is_updated, records = check_ip(records)
-                        web_contents = html.build_html(True, records, image_file_path)
-                        # htmlフォルダなかったら作って、index.htmlに書き出し
-                        index_dir = Path(cfg['web_server']['document_root'])
-                        if not index_dir.is_dir():
-                            index_dir.mkdir()
-                        index_path = index_dir.joinpath('index.html')
-                        with open(index_path, 'w', encoding='utf-8') as f:
-                            f.write(web_contents)
-
-                    if is_post_time:
-                        post_result = post_line(cfg['line']['api_url'], cfg['line']['access_token'], image_file_path)
-                        level = 'error' if 'Error' in post_result else 'info'
-                        log.logging(level, 'LINE result: {}'.format(post_result))
                 break
         break
+
+    is_send_time = now.strftime('%H') == cfg['mail_send_time']
+    is_post_time = now.strftime('%H') == cfg['line']['post_time']
+    # 指定時間になったらメール送信 or LINEで通知。指定時間以外は、webサーバー動いている環境ならindex.htmlに書き出し
+    if is_send_time or is_post_time or cfg['web_server']['is_running']:
+        level = 'info'
+        # グラフ画像
+        grph = Graph(records)
+        image_file_path = grph.draw_graph()
+        # コンテンツ作成
+        html = Html(root_dir)
+
+        if is_send_time:
+            log.logging(level, 'It is time to send an email')
+            is_updated, records = check_ip(records)
+            mail_contents = html.build_html(False, records, image_file_path)
+            subject = 'IP Address is UPDATED' if is_updated else 'IP Address is NOT updated'
+            body_dict = {'subject': subject, 'body': mail_contents}
+            # メール送信
+            log.logging(level, 'Start to send email')
+            mailer = Mail(cfg['mail_info'])
+            msg = mailer.create_message(body_dict)
+            result = mailer.send_mail(msg)
+            level = 'error' if 'Error' in result else 'info'
+            log.logging(level, 'Send Mail Result {}'.format(result))
+        else:
+            log.logging(level, 'It is not time to send an email')
+
+        if cfg['web_server']['is_running']:
+            is_updated, records = check_ip(records)
+            web_contents = html.build_html(True, records, image_file_path)
+            # htmlフォルダなかったら作って、index.htmlに書き出し
+            index_dir = Path(cfg['web_server']['document_root'])
+            if not index_dir.is_dir():
+                index_dir.mkdir()
+            index_path = index_dir.joinpath('index.html')
+            with open(index_path, 'w', encoding='utf-8') as f:
+                f.write(web_contents)
+
+        if is_post_time:
+            post_result = post_line(cfg['line']['api_url'], cfg['line']['access_token'], image_file_path)
+            level = 'error' if 'Error' in post_result else 'info'
+            log.logging(level, 'LINE result: {}'.format(post_result))
 
     level = 'info'
     log.logging(level, 'Kakuninsan Stopped.')
