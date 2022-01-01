@@ -1,0 +1,29 @@
+version: "3"
+services:
+  kakuninsan:
+    build: ./
+    container_name: app-kakuninsan
+    volumes:
+      - type: bind
+        source: "./kakuninsan"
+        target: "/var/kakuninsan/kakuninsan"
+      - type: volume
+        source: src
+        target: "/var/kakuninsan/web/src"
+    restart: always
+  nginx-kakuninsan:
+    image: nginx:latest
+    container_name: nginx-kakuninsan
+    ports:
+      - "8002:80"
+    volumes:
+      - type: bind
+        source: "./web/conf.d/default.conf"
+        target: "/etc/nginx/conf.d/default.conf"
+      - type: volume
+        source: src
+        target: "/var/kakuninsan/web/src"
+    restart: always
+
+volumes:
+  src:

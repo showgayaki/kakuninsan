@@ -61,7 +61,7 @@ class Graph:
         plt.grid(True)
 
         # グラフ画像保存
-        image_dir = os.path.join(Path(os.path.dirname(__file__)).parent, 'html/img')
+        image_dir = os.path.join(Path(os.path.dirname(__file__)).parent, 'web/src/img')
         if not os.path.isdir(image_dir):
             os.makedirs(image_dir)
         image_file_path = os.path.join(image_dir, 'graph.png')
