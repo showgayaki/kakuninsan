@@ -6,7 +6,7 @@ import re
 class SpeedTest:
     def __init__(self):
         self.SERVER_COUNT = 3
-        self.OPTIONS = ['speedtest', '--json', '--share']
+        self.OPTIONS = ['speedtest', '--json']
 
     def sponsor(self):
         # 日本のサーバーを取得
