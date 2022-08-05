@@ -1,4 +1,4 @@
-from logging import Formatter, handlers, getLogger
+from logging import Formatter, handlers, getLogger, root
 from pathlib import Path
 
 
@@ -7,9 +7,9 @@ class Logger:
         self.logger = getLogger(name)
         formatter = Formatter("[%(asctime)s] [%(process)d] [%(levelname)s] %(message)s")
 
-        # /[root_dir]/log/[app_name].logに出力
-        root_dir = Path(root_dir).resolve()
+        # /[root_dir]/[app_name]/log/[app_name].logに出力
         dir_name = root_dir.name
+        root_dir = Path.joinpath(Path(root_dir).resolve(), dir_name)
         log_dir = Path.joinpath(Path(root_dir).resolve(), 'log')
         # logフォルダ無かったら作成
         if not log_dir.is_dir():
