@@ -6,11 +6,11 @@ import re
 class SpeedTest:
     def __init__(self):
         self.SERVER_COUNT = 3
-        self.OPTIONS = ['speedtest', '--json']
+        self.OPTIONS = ['speedtest', '--json', '--secure']
 
     def sponsor(self):
         # 日本のサーバーを取得
-        p1 = subprocess.Popen(['speedtest', '--list'], encoding='utf-8', stdout=subprocess.PIPE)
+        p1 = subprocess.Popen(['speedtest', '--list', '--secure'], encoding='utf-8', stdout=subprocess.PIPE)
         p2 = subprocess.Popen(['grep', 'Japan'], encoding='utf-8', stdin=p1.stdout, stdout=subprocess.PIPE)
         p1.stdout.close()
         # Serverを抜き出してリスト化

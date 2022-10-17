@@ -65,6 +65,9 @@ def main():
 
     # DBインスタンス
     db = TableIp(cfg['db_info'], cfg['table_detail']['table_name'])
+    # 指定時間分のレコード取得
+    interval_hour = int(cfg['interval_hour']) if cfg['interval_hour'] else 24
+    records = db.fetch_last_ip(cfg['table_detail']['clm_created_at'], interval_hour)
 
     # スピードテスト
     st = SpeedTest()
@@ -82,6 +85,12 @@ def main():
     # server_list.update(test_server)
 
     for server_id in server_ids:
+        # サーバーリストが取得できなかったら、ループを抜けてスピードテストは行わない
+        if server_id == '0':
+            level = 'error'
+            log.logging(level, 'FAILED to fetch Server list.')
+            break
+
         for i in range(1, int(cfg['speedtest']['retry_count']) + 1):
             level = 'info'
             log.logging(level, 'Start SpeedTest on Server[id: {}, sponsor: {}], count: {}'
@@ -111,9 +120,6 @@ def main():
                 level = 'error' if 'Error' in insert_result else 'info'
                 log.logging(level, 'DB insert {}'.format(insert_result))
 
-                interval_hour = int(cfg['interval_hour']) if cfg['interval_hour'] else 24
-                log.logging(level, 'Start fetch last ip')
-                records = db.fetch_last_ip(cfg['table_detail']['clm_created_at'], interval_hour)
                 level = 'error' if 'Error' in records else 'info'
                 # 前回のIPは、今回インサートしたものの一つ前(listの2番目)のレコード
                 last_ip = records[1][1]
