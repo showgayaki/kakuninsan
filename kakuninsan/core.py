@@ -65,9 +65,6 @@ def main():
 
     # DBインスタンス
     db = TableIp(cfg['db_info'], cfg['table_detail']['table_name'])
-    # 指定時間分のレコード取得
-    interval_hour = int(cfg['interval_hour']) if cfg['interval_hour'] else 24
-    records = db.fetch_last_ip(cfg['table_detail']['clm_created_at'], interval_hour)
 
     # スピードテスト
     st = SpeedTest()
@@ -120,15 +117,19 @@ def main():
                 level = 'error' if 'Error' in insert_result else 'info'
                 log.logging(level, 'DB insert {}'.format(insert_result))
 
-                level = 'error' if 'Error' in records else 'info'
-                # 前回のIPは、今回インサートしたものの一つ前(listの2番目)のレコード
-                last_ip = records[1][1]
-                log.logging(level, 'Last IP Address: {}'.format(last_ip))
                 level = 'info'
                 break
         # スピードテストが成功したらループ抜ける
         if level == 'info':
             break
+
+    # 指定時間分のレコード取得
+    interval_hour = int(cfg['interval_hour']) if cfg['interval_hour'] else 24
+    records = db.fetch_last_ip(cfg['table_detail']['clm_created_at'], interval_hour)
+    level = 'error' if 'Error' in records else 'info'
+    # 前回のIPは、今回インサートしたものの一つ前(listの2番目)のレコード
+    last_ip = records[1][1]
+    log.logging(level, 'Last IP Address: {}'.format(last_ip))
 
     is_send_time = now.strftime('%H') == cfg['mail_send_time']
     is_post_time = now.strftime('%H') == cfg['line']['post_time']
