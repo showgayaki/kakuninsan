@@ -1,9 +1,9 @@
 version: "3"
 services:
-  kakuninsan:
+  kakuninsan_app:
     build: ./
-    image: app-kakuninsan
-    container_name: app-kakuninsan
+    image: kakuninsan_app
+    container_name: kakuninsan_app
     volumes:
       - type: bind
         source: "./kakuninsan"
@@ -13,10 +13,10 @@ services:
         target: "/var/kakuninsan/web/src"
     restart: always
     tty: true
-  nginx-kakuninsan:
+  kakuninsan_nginx:
     build: ./web
-    image: nginx-kakuninsan
-    container_name: nginx-kakuninsan
+    image: kakuninsan_nginx
+    container_name: kakuninsan_nginx
     ports:
       - "8002:80"
     volumes:
