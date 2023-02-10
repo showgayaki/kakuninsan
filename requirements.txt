@@ -1,0 +1,6 @@
+requests
+mysql-connector-python
+python-dotenv
+speedtest-cli
+jinja2
+matplotlib

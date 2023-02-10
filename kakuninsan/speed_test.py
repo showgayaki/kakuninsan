@@ -6,11 +6,14 @@ import re
 class SpeedTest:
     def __init__(self):
         self.SERVER_COUNT = 3
-        self.OPTIONS = ['speedtest', '--json', '--secure']
+        self.OPTIONS = ['python', '-m', 'speedtest', '--secure']
 
     def sponsor(self):
+        command = []
+        command.extend(self.OPTIONS)
+        command.append('--list')
         # 日本のサーバーを取得
-        p1 = subprocess.Popen(['speedtest', '--list', '--secure'], encoding='utf-8', stdout=subprocess.PIPE)
+        p1 = subprocess.Popen(command, encoding='utf-8', stdout=subprocess.PIPE)
         p2 = subprocess.Popen(['grep', 'Japan'], encoding='utf-8', stdin=p1.stdout, stdout=subprocess.PIPE)
         p1.stdout.close()
         # Serverを抜き出してリスト化
@@ -61,7 +64,7 @@ class SpeedTest:
         options = []
         if server_id != '0':
             options.extend(self.OPTIONS)
-            options.append('--server')
+            options.extend(['--json', '--server'])
             options.append(server_id)
         result_dict = {}
         try:

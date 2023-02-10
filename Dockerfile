@@ -1,21 +1,24 @@
-FROM python:3.8-slim-bullseye
+FROM python:3.9-slim-bullseye AS build
+
+WORKDIR /tmp
+COPY requirements.txt /tmp
 
 RUN apt-get update -y && apt-get upgrade -y \
-&& DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-&& apt-get -y install locales && localedef -f UTF-8 -i ja_JP ja_JP.UTF-8 \
+&& rm -rf /var/lib/apt/lists/* && apt-get clean && apt-get autoclean && apt-get autoremove \
 && pip install --upgrade pip setuptools \
-&& pip install pipenv \
-&& rm -rf /var/lib/apt/lists/* && apt-get clean && apt-get autoclean && apt-get autoremove
+&& pip install -r requirements.txt
+
+
+FROM gcr.io/distroless/python3-debian11:debug
+
+COPY --from=build /usr/local/lib/python3.9/site-packages /usr/lib/python3.9/dist-packages
+COPY . /var/kakuninsan
 
 ENV LANG ja_JP.UTF-8
 ENV LANGUAGE ja_JP:ja
 ENV LC_ALL ja_JP.UTF-8
 ENV TERM xterm
 ENV TZ JST-9
-
-COPY . /var/kakuninsan
-WORKDIR /var/kakuninsan
-RUN pipenv install --system --deploy
 
 # WORKDIR /var/kakuninsan/web/src
 # RUN apt-get install -y nodejs npm
