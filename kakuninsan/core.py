@@ -60,64 +60,57 @@ def main():
     cfg = config.config(root_dir)
     # computer_name取得
     computer_name = socket.gethostname()
-    level = 'info'
-    log.logging(level, '===== Kakuninsan Started on {} ====='.format(computer_name))
+    log.logging('info', '===== Kakuninsan Started on {} ====='.format(computer_name))
 
     # DBインスタンス
     db = TableIp(cfg['db_info'], cfg['table_detail']['table_name'])
 
     # スピードテスト
     st = SpeedTest()
-    log.logging(level, 'Fetch Server list.')
-    server_list = st.sponsor()
-    log.logging(level, '---Server list---')
+    log.logging('info', 'Fetch Server list.')
+    server_dict = st.sponsor()
+    log.logging('info', '---Server list---')
     server_ids = []
-    for i, item in enumerate(server_list.items()):
+    for i, item in enumerate(server_dict.items()):
         server_ids.append(item[0])
-        log.logging(level, 'Server{}: {}'.format(i + 1, item))
-    log.logging(level, '-----------------')
+        log.logging('info', 'Server{}: {}'.format(i + 1, item))
+    log.logging('info', '-----------------')
 
     # test_server = {'20976': {'sponsor': 'GLBB Japan', 'server_area': 'Tokyo, Japan', 'distance': '2.12 km'}}
     # server_ids.insert(0, '20976')
-    # server_list.update(test_server)
+    # server_dict.update(test_server)
 
     for server_id in server_ids:
         # サーバーリストが取得できなかったら、ループを抜けてスピードテストは行わない
         if server_id == '0':
-            level = 'error'
-            log.logging(level, 'FAILED to fetch Server list.')
+            log.logging('error', 'FAILED to fetch Server list.')
             break
 
         for i in range(1, int(cfg['speedtest']['retry_count']) + 1):
-            level = 'info'
-            log.logging(level, 'Start SpeedTest on Server[id: {}, sponsor: {}], count: {}'
-                        .format(server_id, server_list[server_id]['sponsor'], i))
+            log.logging('info', 'Start SpeedTest on Server[id: {}, sponsor: {}], count: {}'
+                        .format(server_id, server_dict[server_id]['sponsor'], i))
             st_result = st.speed_test_result(server_id)
 
             if 'Error' in st_result.keys():
-                level = 'error'
-                log.logging(level, 'SpeedTest Failed: {}'.format(st_result['Error']))
-                log.logging(level, 'Pause for {} Seconds.'.format(cfg['speedtest']['interval_seconds']))
+                log.logging('error', 'SpeedTest Failed: {}'.format(st_result['Error']))
+                log.logging('error', 'Pause for {} Seconds.'.format(cfg['speedtest']['interval_seconds']))
                 time.sleep(int(cfg['speedtest']['interval_seconds']))
                 continue
             else:
-                level = 'info'
                 current_ip = st_result['global_ip_address']
-                log.logging(level, 'Current IP Address: {}'.format(current_ip))
+                log.logging('info', 'Current IP Address: {}'.format(current_ip))
 
                 download = graph.bytes_to_megabytes(st_result['download'])
                 upload = graph.bytes_to_megabytes(st_result['upload'])
-                log.logging(level, 'Download Speed: {} Mbps'.format(download))
-                log.logging(level, 'Upload Speed: {} Mbps'.format(upload))
+                log.logging('info', 'Download Speed: {} Mbps'.format(download))
+                log.logging('info', 'Upload Speed: {} Mbps'.format(upload))
 
                 # Insert
-                log.logging(level, 'Start DB insert')
+                log.logging('info', 'Start DB insert')
                 insert_dict = insert_info(now, computer_name, st_result)
                 insert_result = db.insert_record(cfg['db_info'], cfg['table_detail'], insert_dict)
                 level = 'error' if 'Error' in insert_result else 'info'
                 log.logging(level, 'DB insert {}'.format(insert_result))
-
-                level = 'info'
                 break
         # スピードテストが成功したらループ抜ける
         if level == 'info':
@@ -135,7 +128,6 @@ def main():
     is_post_time = now.strftime('%H') == cfg['line']['post_time']
     # 指定時間になったらメール送信 or LINEで通知。指定時間以外は、webサーバー動いている環境ならindex.htmlに書き出し
     if is_send_time or is_post_time or cfg['web_server']['is_running']:
-        level = 'info'
         # グラフ画像
         grph = Graph(records)
         image_file_path = grph.draw_graph()
@@ -143,20 +135,20 @@ def main():
         html = Html(root_dir)
 
         if is_send_time:
-            log.logging(level, 'It is time to send an email')
+            log.logging('info', 'It is time to send an email')
             is_updated, records = check_ip(records)
             mail_contents = html.build_html(False, records, image_file_path)
             subject = 'IP Address is UPDATED' if is_updated else 'IP Address is NOT updated'
             body_dict = {'subject': subject, 'body': mail_contents}
             # メール送信
-            log.logging(level, 'Start to send email')
+            log.logging('info', 'Start to send email')
             mailer = Mail(cfg['mail_info'])
             msg = mailer.create_message(body_dict)
             result = mailer.send_mail(msg)
             level = 'error' if 'Error' in result else 'info'
             log.logging(level, 'Send Mail Result {}'.format(result))
         else:
-            log.logging(level, 'It is not time to send an email')
+            log.logging('info', 'It is not time to send an email')
 
         if cfg['web_server']['is_running']:
             is_updated, records = check_ip(records)
@@ -170,15 +162,14 @@ def main():
                 f.write(web_contents)
 
         if is_post_time:
-            log.logging(level, 'Start post to LINE.')
+            log.logging('info', 'Start post to LINE.')
             post_result = post_line(cfg['line']['api_url'], cfg['line']['access_token'], image_file_path)
             level = 'error' if 'Error' in post_result else 'info'
             log.logging(level, 'LINE result: {}'.format(post_result))
         else:
-            log.logging(level, 'It is not time to post to LINE.')
+            log.logging('info', 'It is not time to post to LINE.')
 
-    level = 'info'
-    log.logging(level, '===== Kakuninsan Stopped. =====')
+    log.logging('info', '===== Kakuninsan Stopped. =====')
 
 
 if __name__ == '__main__':

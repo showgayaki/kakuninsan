@@ -12,53 +12,58 @@ class SpeedTest:
         command = []
         command.extend(self.OPTIONS)
         command.append('--list')
-        # 日本のサーバーを取得
-        p1 = subprocess.Popen(command, encoding='utf-8', stdout=subprocess.PIPE)
-        p2 = subprocess.Popen(['grep', 'Japan'], encoding='utf-8', stdin=p1.stdout, stdout=subprocess.PIPE)
-        p1.stdout.close()
-        # Serverを抜き出してリスト化
-        server_list = {}
+        # python -m speedtest --secure --list
+        command_result = subprocess.run(command, encoding='utf-8', stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if command_result.returncode != 0:
+            return {'0': {'error': command_result.stderr}}
+
+        # Serverを抜き出してDictionary化
+        server_dict = {}
         # 14623) IPA CyberLab (Bunkyo, Japan)[**.** km]
         # 上記の形で出力されるので、整形してdictにする
-        for server in p2.communicate()[0].split('\n'):
+        for server in command_result.stdout.split('\n'):
             server_id = '0'
             distance = '0.0 km'
             server_area = ''
-            # 先頭空白削除して、server_idをとりあえずかっこ付きで抜き出し
-            server = server.lstrip()
-            id_match = re.compile(r'\d+\)')
-            if id_match.match(server):
-                server_id = id_match.match(server).group()
-                # 出力文字列からserver_idを削除、先頭空白も削除
-                server = id_match.sub('', server).lstrip()
-                # カッコ取る
-                server_id = server_id.replace(')', '')
+            # 日本のサーバーを取得
+            if 'Japan' in server:
+                # 先頭空白削除して、server_idをとりあえずかっこ付きで抜き出し
+                server = server.lstrip()
+                id_match = re.compile(r'\d+\)')
+                if id_match.match(server):
+                    server_id = id_match.match(server).group()
+                    # 出力文字列からserver_idを削除、先頭空白も削除
+                    server = id_match.sub('', server).lstrip()
+                    # カッコ取る
+                    server_id = server_id.replace(')', '')
 
-            # 距離抜き出し
-            distance_match = re.compile(r'\[\d+\.\d+ km\]')
-            if distance_match.search(server):
-                distance = distance_match.search(server).group()
-                # 出力文字列からdistance削除
-                server = distance_match.sub('', server)
-                # カッコ取る
-                distance = distance.replace('[', '').replace(']', '')
+                # 距離抜き出し
+                distance_match = re.compile(r'\[\d+\.\d+ km\]')
+                if distance_match.search(server):
+                    distance = distance_match.search(server).group()
+                    # 出力文字列からdistance削除
+                    server = distance_match.sub('', server)
+                    # カッコ取る
+                    distance = distance.replace('[', '').replace(']', '')
 
-            # サーバーエリア抜き出し
-            server_area_match = re.compile(r' \(.+, Japan\)')
-            if server_area_match.search(server):
-                server_area = server_area_match.search(server).group().lstrip()
-                server = server_area_match.sub('', server)
-                server_area = server_area.replace('(', '').replace(')', '')
+                # サーバーエリア抜き出し
+                server_area_match = re.compile(r' \(.+, Japan\)')
+                if server_area_match.search(server):
+                    server_area = server_area_match.search(server).group().lstrip()
+                    server = server_area_match.sub('', server)
+                    server_area = server_area.replace('(', '').replace(')', '')
 
-            server_list[server_id] = {}
-            server_list[server_id]['sponsor'] = server.rstrip()
-            server_list[server_id]['server_area'] = server_area
-            server_list[server_id]['distance'] = distance
+                server_dict[server_id] = {}
+                server_dict[server_id]['sponsor'] = server.rstrip()
+                server_dict[server_id]['server_area'] = server_area
+                server_dict[server_id]['distance'] = distance
+            else:
+                continue
 
-            if len(server_list) == self.SERVER_COUNT:
+            if len(server_dict) == self.SERVER_COUNT:
                 break
 
-        return server_list
+        return server_dict
 
     def speed_test_result(self, server_id):
         options = []

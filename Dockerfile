@@ -9,7 +9,7 @@ RUN apt-get update -y && apt-get upgrade -y \
 && pip install -r requirements.txt
 
 
-FROM gcr.io/distroless/python3-debian11:debug
+FROM gcr.io/distroless/python3-debian11
 
 COPY --from=build /usr/local/lib/python3.9/site-packages /usr/lib/python3.9/dist-packages
 COPY . /var/kakuninsan
